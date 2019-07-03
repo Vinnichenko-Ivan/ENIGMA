@@ -13,16 +13,28 @@
 #define pwmC 9
 #define digital1C 7
 #define digital2C 8
+#define l1p A8 //
+#define l2p A7
+#define l3p A2
+#define l4p A1
+#define l5p A0
+#define l6p A6
+#define l7p A5
+#define l8p A3
+#define lap A4
+
 class Tech
 {
 	public:	
+		int l1,l2,l3,l4,l5,l6,l7,l8,la,l1k,l2k,l3k,l4k,l5k,l6k,l7k,l8k,lak;
+		bool l1b,l2b,l3b,l4b,l5b,l6b,l7b,l8b;
 		void motor(char a,int b);
 		Tech(bool debug, bool bluetooth);
 		int distL=-1,distR=-1,distB=-1,rezet=0;
 		int OdistL=-1,OdistR=-1,OdistB=-1;
 		int timeUs,azimut,degree=-1;
 		unsigned long int timer;
-		int numUs=0,Dir;
+		int numUs=0,Dir,li=0;
 		int US(char port);
 		int Distance();
 		bool debug; 
@@ -35,6 +47,7 @@ class Tech
 		void move(float a, float power,float error);
 		int UP();
 		void IRlego();
+		void line();
 		
 };
 Tech::Tech(bool debu, bool bluetoot){
@@ -152,34 +165,107 @@ void Tech::first(bool debu, bool bluetoot){
 	pinMode(digital2A,OUTPUT);
 	pinMode(digital2B,OUTPUT);
 	pinMode(digital2C,OUTPUT);
+	pinMode(l1p,INPUT);
+	pinMode(l2p,INPUT);
+	pinMode(l3p,INPUT);
+	pinMode(l4p,INPUT);
+	pinMode(l5p,INPUT);
+	pinMode(l6p,INPUT);
+	pinMode(l7p,INPUT);
+	pinMode(l8p,INPUT);
+	pinMode(lap,INPUT);
+	l1k=analogRead(l1p);
+	l2k=analogRead(l2p);
+	l3k=analogRead(l3p);
+	l4k=analogRead(l4p);
+	l5k=analogRead(l5p);
+	l6k=analogRead(l6p);
+	l7k=analogRead(l7p);
+	l8k=analogRead(l8p);
+	lak=analogRead(lap);
+}
+void Tech::line(){
+	l1=analogRead(l1p)-l1k;
+	l2=analogRead(l2p)-l2k;
+	l3=analogRead(l3p)-l3k;
+	l4=analogRead(l4p)-l4k;
+	l5=analogRead(l5p)-l5k;
+	l6=analogRead(l6p)-l6k;
+	l7=analogRead(l7p)-l7k;
+	l8=analogRead(l8p)-l8k;
+	if(l1>15)
+		l1b=1;
+	else
+		l1b=0;
+	if(l2>30)
+		l2b=1;
+	else
+		l2b=0;
+	if(l3>30)
+		l3b=1;
+	else
+		l3b=0;
+	if(l4>30)
+		l4b=1;
+	else
+		l4b=0;
+	if(l5>30)
+		l5b=1;
+	else
+		l5b=0;
+	if(l6>30)
+		l6b=1;
+	else
+		l6b=0;
+	if(l7>30)
+		l7b=1;
+	else
+		l7b=0;
+	if(l8>30)
+		l8b=1;
+	else
+		l8b=0;
+
+	li++;
+	if(debug&&li==100){
+		Serial.print(" l1: ");
+		Serial.print(l1b);
+		Serial.print(" l2: ");
+		Serial.print(l2b);
+		Serial.print(" l3: ");
+		Serial.print(l3b);
+		Serial.print(" l4: ");
+		Serial.print(l4b);
+		Serial.print(" l5: ");
+		Serial.print(l5b);
+		Serial.print(" l6: ");
+		Serial.print(l6b);
+		Serial.print(" l7: ");
+		Serial.print(l7b);
+		Serial.print(" l8: ");
+		Serial.println(l8b); 
+		li=0;
+	}
 }
 
 void Tech::gyro(){
-  if (Serial1.available()) {
+  if(Serial1.available()) {
+  //  Serial.print("p");
+    
+    // get the new byte:
     c = (char)Serial1.read();
-    //Serial.print(c);
+    // add it to the inputString:
     beta += c;
+    // if the incoming character is a newline, set a flag so the main loop can
+    // do something about it:
     if (c == '\n') {
-      degree = beta.toInt();
-      beta = "";
-      gete = 1;
+        Serial1.print("\n");
+      if(debug)
+
+	Serial.println(degree);
+      degree=beta.toInt();
+      beta="";
     }
-  }
-  if (gete && millis() - timer > 50) {
-	if(debug){
-		Serial.print("Gyro: ");
-		Serial.println(degree);
-	}
-//rezet++;
-//if(rezet=10){
-//	Serial1.end();
-//	Serial1.begin(115200) ;
-//rezet=0;
-//}
-Serial1.flush();
-    Serial1.println("\n");
-    timer = millis();
-    gete = 0;
   }
 }
 int Tech::Distance(){
