@@ -1,3 +1,6 @@
+//Enigma version 1.2 
+//move dont work
+//dont compile
 #include <Wire.h> //Include the Wire Library
 #include <HTInfraredSeeker.h>
 #define leftUs 33 //port left us
@@ -35,9 +38,6 @@
 #define tsopZad2 A11
 class puncher{
 	private:
-		
-
-
 		long timeOld;
 		long time=0;
 		int volt=0, deus=0;
