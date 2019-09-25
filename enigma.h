@@ -1,31 +1,108 @@
 #include <Wire.h> //Include the Wire Library
 #include <HTInfraredSeeker.h>
-#define leftUs 21 //port left us
-#define rightUs 23 //port right us
-#define backUs 22 //port back us
+#define leftUs 33 //port left us
+#define rightUs 37 //port right us
+#define backUs 35 //port back us
 #define delayUs 50 //delay betweem 
-#define pwmA 10
-#define digital1A 12
-#define digital2A 11
-#define pwmB 4
-#define digital1B 5 
-#define digital2B 6
-#define pwmC 9
-#define digital1C 7
-#define digital2C 8
-#define l1p A8 //
-#define l2p A7
+#define pwmA 12
+#define digital1A 11
+#define digital2A 10
+#define pwmB 9
+#define digital1B 8 
+#define digital2B 7
+#define pwmC 4
+#define digital1C 5
+#define digital2C 6
+#define l1p A0 //
+#define l2p A1
 #define l3p A2
-#define l4p A1
-#define l5p A0
-#define l6p A6
-#define l7p A5
-#define l8p A3
-#define lap A4
+#define l4p A3
+#define l5p A4
+#define l6p A5
+#define l7p A6
+#define l8p A7
+#define lap A8
+#define SignalDiod1 30
+#define SignalDiod2 29
+#define SignalDiod3 31
+#define PupPin 53
+#define punchPin 52
+#define optoPin A9
+#define tsopPered1 A13
+#define tsopPered2 A12
+#define tsopPered3 A14
+#define tsopZad1 A10
+#define tsopZad2 A11
+class puncher{
+	private:
+		
 
+
+		long timeOld;
+		long time=0;
+		int volt=0, deus=0;
+	public: 
+		int s;
+		bool ballTest();
+		void S();
+		void stepUp();
+		void Hpunch();
+		void punch();
+};
+
+	void puncher::Hpunch(){
+
+			digitalWrite(52,1);
+			delay(500);
+			digitalWrite(52,0);
+			volt=0;	
+			
+
+	}
+	void puncher::punch(){
+		if(volt==2&&ballTest()&&millis()-time>1000){
+			digitalWrite(52,1);
+			delay(500);
+			digitalWrite(52,0);
+			volt=0;
+			time=millis();	
+		}	
+		else{
+			stepUp();		
+		}
+	}
+	void puncher::stepUp(){
+		if(volt==0){
+			pinMode(PupPin,OUTPUT);
+			digitalWrite(PupPin,1);
+			timeOld=millis();
+			volt=1;
+		}
+		if(millis()-timeOld>1000&&volt==1) {
+			volt=2;
+			pinMode(PupPin,OUTPUT);
+			digitalWrite(PupPin,0);					
+		}
+	}
+	void puncher::S(){
+		pinMode(optoPin,INPUT);
+		pinMode(punchPin,OUTPUT);
+		pinMode(punchPin,OUTPUT);
+		s=analogRead(optoPin);
+	}
+	bool puncher::ballTest(){
+		if(analogRead(optoPin)<100	)
+			return 1;
+		else
+			return 0;	
+	}
 class Tech
 {
 	public:	
+		void diod(int number,int mode);
+		bool button1=0,button2=0,button3=0;
+		void button();
+		bool d1=0, d2=0, d3=0;
 		int l1,l2,l3,l4,l5,l6,l7,l8,la,l1k,l2k,l3k,l4k,l5k,l6k,l7k,l8k,lak;
 		bool l1b,l2b,l3b,l4b,l5b,l6b,l7b,l8b;
 		void motor(char a,int b);
@@ -34,7 +111,7 @@ class Tech
 		int OdistL=-1,OdistR=-1,OdistB=-1;
 		int timeUs,azimut,degree=-1;
 		unsigned long int timer;
-		int numUs=0,Dir,li=0;
+		int numUs=0,Dir,Str,li=0;
 		int US(char port);
 		int Distance();
 		bool debug; 
@@ -46,8 +123,10 @@ class Tech
 		void first(bool debu, bool bluetoot);
 		void move(float a, float power,float error);
 		int UP();
+		void setAzimut(int plusNum);
 		void IRlego();
 		void line();
+		bool usTrue();
 		
 };
 Tech::Tech(bool debu, bool bluetoot){
@@ -69,19 +148,62 @@ Tech::Tech(bool debu, bool bluetoot){
 	azimut = degree;
 
 }
+void Tech::setAzimut(int plusNum)
+{
+	if(azimut+plusNum>360)
+		azimut = 360 - (azimut+plusNum);
+	else if(azimut+plusNum<0)
+		azimut = 360 + (azimut+plusNum);
+	else
+		azimut = azimut + plusNum;	
+	
+
+		
+}
+void Tech::button(){
+button1 =digitalRead(28);
+button2 =digitalRead(27);
+button3 =digitalRead(26);
+}
 void Tech::IRlego(){
 	InfraredResult InfraredBall = InfraredSeeker::ReadAC();
 	Dir = InfraredBall.Direction;
-	
+	Str = InfraredBall.Strength;
 }
 int Tech::UP(){
 	return (degree+540-azimut)%360-180;
 }
-void Tech::move(float a, float power,float error){
+void Tech::move(float a, float power,float error, float skos){
+
+/* if((l8b||l7b||l6b)&&(l3b||l4b||l5b)){
+a=90;
+}
+   
+else if(l1b||l2b){
+    if(a>1&&a<179){
+      a=270;
+    } 
+  }
+ else if(l8b){
+    if(a>91&&a<269){
+      power=0;
+    } 
+  }
+ else if(l7b||l6b){
+      a=0; 
+  }
+ else if(l3b){
+    if(a<89&&a>271){
+      power=0;
+    } 
+  }
+  if(l4b||l5b){ 
+      a=180;
+  }*/
 	a = (a) / 57.3; 
-	float PB = -(-cos(a) * power)+error; 
-	float PC = -(0.5 * cos(a) * power + 0.87 * sin(a) * power)+error; 
-	float PA = (0.5 * cos(a) * power - 0.87 * sin(a) * power)-error; 
+	float PB = (cos(-90+skos)*sin(-90+skos)*(-cos(a) * power))+error; 
+	float PC = -(sin(30+skos) * cos(a) * power + cos(30+skos) * sin(a) * power)+error; 
+	float PA = (sin(150+skos) * cos(a) * power + cos(150+skos) * sin(a) * power)-error; 
 	 
 	if(a <= 0) { 
 		motor('A', PA); 
@@ -139,7 +261,9 @@ void Tech::motor(char a,int b){
 	}
 }
 void Tech::first(bool debu, bool bluetoot){
-
+	pinMode(SignalDiod1,OUTPUT);
+	pinMode(SignalDiod2,OUTPUT);
+	pinMode(SignalDiod3,OUTPUT);
 	InfraredSeeker::Initialize();
 	Serial1.begin(115200);
 	Serial1.println("\n");
@@ -244,10 +368,88 @@ void Tech::line(){
 		Serial.print(l7b);
 		Serial.print(" l8: ");
 		Serial.println(l8b); 
+		Serial2.print(" l1: ");
+		Serial2.print(l1b);
+		Serial2.print(" l2: ");
+		Serial2.print(l2b);
+		Serial2.print(" l3: ");
+		Serial2.print(l3b);
+		Serial2.print(" l4: ");
+		Serial2.print(l4b);
+		Serial2.print(" l5: ");
+		Serial2.print(l5b);
+		Serial2.print(" l6: ");
+		Serial2.print(l6b);
+		Serial2.print(" l7: ");
+		Serial2.print(l7b);
+		Serial2.print(" l8: ");
+		Serial2.println(l8b); 
 		li=0;
 	}
 }
+void Tech::diod(int number,int mode){
+	if(number==1){
+		if(mode==0){
+			digitalWrite(SignalDiod1,0);
+			d1=0;	
+		}
+		if(mode==1){
+			digitalWrite(SignalDiod1,1);
+			d1=1;	
+		}	
+		if(mode==2){
+			if(d1){
+				digitalWrite(SignalDiod1,0);
+				d1=0;				
+			}
+			else{
+				digitalWrite(SignalDiod1,1);
+				d1=1;			
+			}	
+		}
+	}
+	if(number==2){
+		if(mode==0){
+			digitalWrite(SignalDiod2,0);
+			d2=0;	
+		}
+		if(mode==1){
+			digitalWrite(SignalDiod2,1);
+			d2=1;	
+		}	
+		if(mode==2){
+			if(d2){
+				digitalWrite(SignalDiod2,0);
+				d2=0;				
+			}
+			else{
+				digitalWrite(SignalDiod2,1);
+				d2=1;			
+			}	
+		}
+	}
+	if(number==3){
+		if(mode==0){
+			digitalWrite(SignalDiod3,0);
+			d3=0;	
+		}
+		if(mode==1){
+			digitalWrite(SignalDiod3,1);
+			d3=1;	
+		}	
+		if(mode==2){
+			if(d3){
+				digitalWrite(SignalDiod3,0);
+				d3=0;				
+			}
+			else{
+				digitalWrite(SignalDiod3,1);
+				d3=1;			
+			}	
+		}
+	}
 
+}
 void Tech::gyro(){
   if(Serial1.available()) {
   //  Serial.print("p");
@@ -267,6 +469,12 @@ void Tech::gyro(){
       beta="";
     }
   }
+}
+bool Tech::usTrue()
+{
+	if(((distL + distR + 20)<182+10) && ((distL + distR + 20)>182-10) && distB > 30)
+		return 1;
+	return 0;  
 }
 int Tech::Distance(){
 	if(debug){
@@ -363,6 +571,47 @@ int Tech::US(char port){
 		return distance;
 	}
 
+}
+class Tsop
+{
+	public:
+		bool ball(bool napr,int port);
+				
+		
+};
+bool Tsop::ball(bool napr,int port)
+{
+	int portArduino;
+	if(!napr)
+	{
+		if(port == 1)
+			portArduino = tsopPered1;
+		else if(port == 2)
+			portArduino = tsopPered2;
+		else if(port == 3)
+			portArduino = tsopPered3;
+	}
+	else
+	{
+		if(port == 1)
+			portArduino = tsopZad1;
+		else if(port == 2)
+			portArduino = tsopZad2;
+	}
+	int count;
+	for(int i = 0;i<10;i++)
+	{
+		int num = pulseIn(portArduino,1,1000);
+		if(num!=0)
+		{
+			count = i;
+			break;
+		}	
+	}
+	if(count == 5 || count == 4)
+		return 1;
+	else
+		return 0;
 }
 class PID{
 	public:
