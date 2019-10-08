@@ -1,0 +1,130 @@
+#include <Enigma.h>
+#include<math.h>
+Tech Tech(0, 0);
+PID Mreg;
+Tsop tsop1;
+Tsop tsop2;
+puncher Pun;
+void setup() {
+  // Serial.begin(115200);
+  //Serial.println(Tech.degree);
+  //Serial.println(Tech.Dir);
+  Tech.first(1, 0);
+  tsop1.first(4);
+  tsop2.first(5);
+  Mreg.first(5, 0, 0, 3000);
+  delay(100);
+  Pun.S();
+  Serial.begin(115200);
+  Serial2.begin(9600);
+}
+int oldAzimut;
+float gateAngle = 0;
+int lastDir = -1;
+int lastStr = -1;
+int angleArr[10] = {270,302,305,327,0,90,180,202,225,247};
+int counter = 0;  
+long long int stIter = millis();
+bool usStatus = 0;
+void loop() {
+  // Serial.println(Pun.s);
+
+  // Serial.println(Pun.ballTest());
+  
+  loopStart:
+
+  //Serial.println(Tech.degree);
+  //Serial.println(Tech.Dir);
+  Tech.gyro();
+  Tech.IRlego();
+  Tech.Distance();
+  Tech.line();
+  Tech.button();
+  Tech.irCalibrate();
+  //Tech.eepromWrite();
+  //Tech.motor('A',255);
+  //Tech.motor('B',255);
+  //Tech.motor('C',255);
+  //delay(2000);
+  //Tech.motor('A',-255);
+  //Tech.motor('B',-255);
+  //Tech.motor('C',-255);
+  //Tech.move(190,255,Mreg.UI(Tech.UP()));
+  if(usStatus == 1)
+  {
+         
+      
+      while(Pun.ballTest())
+      {
+          Serial2.write("US!:");
+          Serial2.write((int)gateAngle);
+          Tech.gyro();
+          Tech.move(90, 255, Mreg.UI(Tech.UP((int)gateAngle)));
+          if(Tech.UP((int)gateAngle)<5 && Tech.UP((int)gateAngle)>-5 )
+          {
+            Pun.Hpunch();
+            break;
+          }
+      }
+      usStatus = 0;
+  }
+  else
+  {
+     Serial2.write("not US!");
+  
+ 
+   if(Tech.usTrue() && Pun.ballTest())
+  {
+      if(Tech.distR>25 && Tech.distR<70)
+      {
+            usStatus = 1;
+            gateAngle = (atan((213 - Tech.distB)/(91-Tech.distR))*57);
+      }
+      else if(Tech.distL>25 && Tech.distL<70)
+      {
+            usStatus = 1;
+            gateAngle = -(atan((213 - Tech.distB)/(91-Tech.distL))*57);
+      }
+      goto loopStart;
+  }
+  else if(tsop1.ball() == 1)
+  {
+        Tech.gyro();
+        Tech.move(235, 255, Mreg.UI(Tech.UP(0)));            
+  }
+  else if(tsop2.ball() == 1)
+  {
+        Tech.move(315, 255, Mreg.UI(Tech.UP(0)));            
+        
+  }
+  else if(tsop1.ball() == 2)
+  {
+      Tech.move(180, 255, Mreg.UI(Tech.UP(0)));            
+  }
+  else if(tsop2.ball() == 2)
+  {
+      Tech.move(0, 255, Mreg.UI(Tech.UP(0)));            
+  }
+  
+  else
+  {
+      //Serial2.write("first");
+      long long int cd = millis();
+      while(millis() - cd < 100)
+      {
+          Tech.gyro();
+          Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(0)));
+      }
+  }
+
+ 
+   
+      if(usStatus == 0 && Tech.Dir == 5)
+      {
+          Pun.stepUp();
+          Pun.punch();
+      }
+  }
+    Tech.driveLine();
+  
+}
