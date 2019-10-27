@@ -170,23 +170,23 @@ void Tech::getBluetooth()
 {
 	if(Serial2.available())
 	{
-
-    lire = (char)Serial2.read();
-    ceta += lire;
-    if (lire == '\n') {
-   
-      if(debug){
-Serial.println("ceta: ");
-Serial.print(ceta);
-}
-      ezet=ceta.toInt();
-      ceta="";
-      if(ezet == 1)
-	   roboMod = 1;
-      else if(ezet == 0)
-	   roboMod = 0;
-    }
-}
+		lire = (char)Serial2.read();
+		ceta += lire;
+		if (lire == '\n') {
+			if(debug){
+				Serial.println("ceta: ");
+				Serial.print(ceta);
+			}
+			ezet=ceta.toInt();
+			ceta="";
+			if(ezet == 1){
+				roboMod = 1;
+			}
+			else if(ezet == 0){
+				roboMod = 0;
+			}
+		}
+	}
 }
 void Tech::eepromWrite()
 {
@@ -229,7 +229,6 @@ void Tech::sectorCount()
 
 }
 void Tech::button(){
-
 button1 = !digitalRead(28);
 button2 = !digitalRead(27);
 button3 = !digitalRead(26);
@@ -298,7 +297,6 @@ void Tech::angleDrive(float a, float power,float error)
 	float PB = (-cos(a) * power)-error; 
 	float PC = (0.5 * cos(a) * power + 0.87 * sin(a) * power)-error; 
 	float PA = (0.5 * cos(a) * power - 0.87 * sin(a) * power)-error; 
-
 	if(a <= 0) { 
 		motor('A', PA); 
 		motor('B', PB); 
@@ -311,7 +309,6 @@ void Tech::angleDrive(float a, float power,float error)
 	}
 }
 void Tech::move(float a, float power,float error){
-
 /* if((l8b||l7b||l6b)&&(l3b||l4b||l5b)){
 a=90;
 }
@@ -404,15 +401,7 @@ else if(l1b||l2b){
 		
 }
 void Tech::distWrite()
-{
-	if(button1)
-	{
-		irDist = Str;
-		EEPROM.write(7,Str);
-		while(!button1)
-			continue;
-	}
-		
+{//todo		
 }
 void Tech::motor(char a,int b){
 	if(b>255){
@@ -423,38 +412,38 @@ void Tech::motor(char a,int b){
 	}
 	if(a=='A'){
 		if(b<0){
-		digitalWrite(digital1A,0);
-                digitalWrite(digital2A,1);
-                analogWrite(pwmA,b*-1);
+			digitalWrite(digital1A,0);
+		        digitalWrite(digital2A,1);
+		        analogWrite(pwmA,b*-1);
 		}
 		if(b>0){
-		digitalWrite(digital1A,1);
-                digitalWrite(digital2A,0);
-                analogWrite(pwmA,b);		
+			digitalWrite(digital1A,1);
+		        digitalWrite(digital2A,0);
+		        analogWrite(pwmA,b);		
 		}
 	}
 	if(a=='B'){
 		if(b<0){
-		digitalWrite(digital1B,0);
-                digitalWrite(digital2B,1);
-                analogWrite(pwmB,-b);
+			digitalWrite(digital1B,0);
+		        digitalWrite(digital2B,1);
+		        analogWrite(pwmB,-b);
 		}
 		if(b>0){
-		digitalWrite(digital1B,1);
-                digitalWrite(digital2B,0);
-                analogWrite(pwmB,b);		
+			digitalWrite(digital1B,1);
+		        digitalWrite(digital2B,0);
+		        analogWrite(pwmB,b);		
 		}
 	}
 	if(a=='C'){
 		if(b<0){
-		digitalWrite(digital1C,0);
-                digitalWrite(digital2C,1);
-                analogWrite(pwmC,-b);
+			digitalWrite(digital1C,0);
+		        digitalWrite(digital2C,1);
+		        analogWrite(pwmC,-b);
 		}
 		if(b>0){
-		digitalWrite(digital1C,1);
-                digitalWrite(digital2C,0);
-                analogWrite(pwmC,b);		
+			digitalWrite(digital1C,1);
+		        digitalWrite(digital2C,0);
+		        analogWrite(pwmC,b);		
 		}
 	}
 }
@@ -484,7 +473,7 @@ void Tech::first(bool debu, bool bluetoot){
 	irDist = EEPROM.read(7);
 	timer = millis();
 	while (degree == -1) {
-    	Tech::gyro();
+    		Tech::gyro();
   	}
 	azimut = degree;
 	pinMode(pwmA,OUTPUT);
@@ -703,32 +692,30 @@ void Tech::diod(int number,int mode){
 
 }
 void Tech::gyro(){
-  if(Serial1.available()) {
-    c = (char)Serial1.read();
-    beta += c;
-    if (c == '\n') {
-        Serial1.print("\n");
-      if(debug&&li==99){
-Serial.println("degree: ");
-Serial.print(degree);
-}
-
-        Serial1.print("\n");
-      degree=beta.toInt();
-      beta="";
-    }
-if(abs(gyroOld-degree)<3&&millis()-timerGyro>5000)
-{
-diod(1,1);
-gyroD=1;
-}
-else if(abs(gyroOld-degree)>3){
-timerGyro=millis();
-gyroOld=degree;
-diod(1,0);
-gyroD=0;
-}
-}
+	if(Serial1.available()) {
+		c = (char)Serial1.read();
+		beta += c;
+		if (c == '\n') {
+			Serial1.print("\n");
+		if(debug&&li==99){
+			Serial.println("degree: ");
+			Serial.print(degree);
+		}
+			Serial1.print("\n");
+			degree=beta.toInt();
+			beta="";
+		}
+		if(abs(gyroOld-degree)<3&&millis()-timerGyro>5000){
+			diod(1,1);
+			gyroD=1;
+		}
+		else if(abs(gyroOld-degree)>3){
+			timerGyro=millis();
+			gyroOld=degree;
+			diod(1,0);
+			gyroD=0;
+		}
+		}
 }
 bool Tech::usTrue()
 {
@@ -868,15 +855,15 @@ short Tsop::ball()
 			break;
 		}	
 	}
-	
-	if(count >= 4)
+	if(count >= 4){
 		status = 1;
-	else
+	}
+	else{
 		status = 0;
+	}
 	buff[0] = buff[1];
 	buff[1] = buff[2];
 	buff[2] = status;
-
 	bool ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2];
 	return ans;
 	
