@@ -4,127 +4,235 @@ Tech Tech(0, 0);
 PID Mreg;
 Tsop tsop1;
 Tsop tsop2;
+Tsop tsop3;
+Tsop tsop4;
+Tsop tsop5;
+bool modes[20];
 puncher Pun;
 void setup() {
-  // Serial.begin(115200);
-  //Serial.println(Tech.degree);
-  //Serial.println(Tech.Dir);
-  Tech.first(1, 0);
-  tsop1.first(4);
-  tsop2.first(5);
-  Mreg.first(5, 0, 0, 3000);
-  delay(100);
-  Pun.S();
-  Serial.begin(115200);
-  Serial2.begin(9600);
+          Tech.first(0, 0);
+          tsop1.first(4);
+          tsop2.first(5);
+          tsop3.first(1);
+          tsop4.first(2);
+          tsop5.first(3);
+          Mreg.first(5, 0, 0, 3000);
+          delay(100);
+          Pun.S();
+          Serial.begin(115200);
+          Serial2.begin(9600);
 }
+bool gameMode = 0;
 int oldAzimut;
+long long lastTime;
+short tsopM = 0;
 float gateAngle = 0;
 int lastDir = -1;
-int lastStr = -1;
+bool nextDir;
 int angleArr[10] = {270,302,305,327,0,90,180,202,225,247};
 int counter = 0;  
 long long int stIter = millis();
 bool usStatus = 0;
 void loop() {
-  // Serial.println(Pun.s);
-
-  // Serial.println(Pun.ballTest());
-  
-  loopStart:
-
-  //Serial.println(Tech.degree);
-  //Serial.println(Tech.Dir);
-  Tech.gyro();
-  Tech.IRlego();
-  Tech.Distance();
-  Tech.line();
-  Tech.button();
-  Tech.irCalibrate();
-  //Tech.eepromWrite();
-  //Tech.motor('A',255);
-  //Tech.motor('B',255);
-  //Tech.motor('C',255);
-  //delay(2000);
-  //Tech.motor('A',-255);
-  //Tech.motor('B',-255);
-  //Tech.motor('C',-255);
-  //Tech.move(190,255,Mreg.UI(Tech.UP()));
-  if(usStatus == 1)
-  {
-         
-      
-      while(Pun.ballTest())
-      {
-          Serial2.write("US!:");
-          Serial2.write((int)gateAngle);
-          Tech.gyro();
-          Tech.move(90, 255, Mreg.UI(Tech.UP((int)gateAngle)));
-          if(Tech.UP((int)gateAngle)<5 && Tech.UP((int)gateAngle)>-5 )
+          Tech.getBluetooth();
+          Tech.gyro() ;
+          Tech.IRlego();
+          Tech.Distance();
+          Tech.button();
+          Tech.irCalibrate();
+          Serial.println(Tech.degree);
+          if(1)
           {
-            Pun.Hpunch();
-            break;
-          }
-      }
-      usStatus = 0;
-  }
-  else
-  {
-     Serial2.write("not US!");
-  
- 
-   if(Tech.usTrue() && Pun.ballTest())
-  {
-      if(Tech.distR>25 && Tech.distR<70)
-      {
-            usStatus = 1;
-            gateAngle = (atan((213 - Tech.distB)/(91-Tech.distR))*57);
-      }
-      else if(Tech.distL>25 && Tech.distL<70)
-      {
-            usStatus = 1;
-            gateAngle = -(atan((213 - Tech.distB)/(91-Tech.distL))*57);
-      }
-      goto loopStart;
-  }
-  else if(tsop1.ball() == 1)
-  {
-        Tech.gyro();
-        Tech.move(235, 255, Mreg.UI(Tech.UP(0)));            
-  }
-  else if(tsop2.ball() == 1)
-  {
-        Tech.move(315, 255, Mreg.UI(Tech.UP(0)));            
-        
-  }
-  else if(tsop1.ball() == 2)
-  {
-      Tech.move(180, 255, Mreg.UI(Tech.UP(0)));            
-  }
-  else if(tsop2.ball() == 2)
-  {
-      Tech.move(0, 255, Mreg.UI(Tech.UP(0)));            
-  }
-  
-  else
-  {
-      //Serial2.write("first");
-      long long int cd = millis();
-      while(millis() - cd < 100)
-      {
-          Tech.gyro();
-          Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(0)));
-      }
-  }
+                nextDir = 0;
+                if(usStatus == 1)
+                {
+                        while(Pun.ballTest())
+                        {
+                                Serial2.write("US!:");
+                                Serial2.write((int)gateAngle);
+                                Tech.gyro();
+                                Tech.move(90, 255, Mreg.UI(Tech.UP((int)gateAngle)));
+                                if(Tech.UP((int)gateAngle)<5 && Tech.UP((int)gateAngle)>-5 )
+                                {
+                                      //  Pun.stepUp();
+                                      //  Pun.Hpunch();
+                                        break;
+                                }
+                        }
+                        usStatus = 0;
+                  }
+                  else
+                  {
+                        Serial2.write("not US!");
+                       /* if(Tech.usTrue() && Pun.ballTest())
+                       {
 
- 
-   
-      if(usStatus == 0 && Tech.Dir == 5)
-      {
-          Pun.stepUp();
-          Pun.punch();
-      }
-  }
-    Tech.driveLine();
+                                     usStatus = 1;
+                                     gateAngle =Tech.angleGate();
+
+
+                        }*/
+                       /* if(tsop3.ball() == 1 && tsop4.ball() == 1)
+                                Tech.move(67,255,Mreg.UI(Tech.UP(0)));
+                        else if(tsop5.ball() == 1 && tsop4.ball() == 1)
+                                Tech.move(113,255,Mreg.UI(Tech.UP(0)));*/
+                        if(tsop5.ball() == 1)
+                                Tech.move(135,255,Mreg.UI(Tech.UP(0)));
+                        else if(tsop3.ball() == 1)
+                                Tech.move(45,255,Mreg.UI(Tech.UP(0)));
+                     //   else if(tsop4.ball() == 1)
+                        //        Tech.move(90,255,Mreg.UI(Tech.UP(0)));
+                         else if(tsop1.ball() == 1 && tsop2.ball() == 1)
+                        {
+                                nextDir = 0;
+                                if(tsopM == 1)
+                                {
+                                        while(Tech.Dir == 9 || Tech.Dir == 8 || Tech.Dir == 0)
+                                        {
+                                                 Tech.IRlego();
+                                                 Tech.gyro();
+                                                 Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
+                                        }
+                                        tsopM = 0;
+                                }
+                                 else if(tsopM == 2)
+                                 {
+                                        while(Tech.Dir == 1 || Tech.Dir == 2 || Tech.Dir == 0)
+                                        {
+                                                 Tech.IRlego();
+                                                 Tech.gyro();
+                                                 Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
+                                        }
+                                        tsopM = 0;
+      
+                                 } 
+                        }                        
+                        else if(tsop1.ball() == 1)
+                        {
+                                nextDir = 0;
+                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));      
+                                tsopM = 1;
+                        }
+                         else if(tsop2.ball() == 1)
+                         {
+                                nextDir = 0;
+                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));      
+                                tsopM = 2;
+                         }
+                 
+                 
+                  else if(Tech.Dir == 0 && tsop1.ball() == 0 && tsop2.ball() == 0)
+                  { 
+                                nextDir = 0;
+                                if(Tech.distL >= Tech.distR)
+                                {
+                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
+                                        {
+                                                Tech.gyro();
+                                                Tech.IRlego();
+                                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
+                                        }      
+                                }
+                                else
+                                {
+                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
+                                        {
+                                                Tech.gyro();
+                                                Tech.IRlego();
+                                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
+                                        }      
+                                }
+                  }
+                  else if(Tech.Dir == 0)
+                  { 
+                            nextDir = 0;
+                            Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+                  }
+                  else
+                  {
+                        long long int cd = millis();
+                        while(millis() - cd < 100)
+                        {
+                                Tech.gyro();
+                                if(nextDir && lastDir == Tech.Dir && (lastDir == 7 || lastDir == 6))
+                                        Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(-map(millis() - lastTime,0,3000,0,40))));
+                                else if(nextDir && lastDir == Tech.Dir && (lastDir == 4 || lastDir == 3))
+                                        Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(map(millis() - lastTime,0,3000,0,40))));
+                                else
+                                        Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(0)));
+                        }
+                        nextDir = 1;
+                        if(lastDir != Tech.Dir)
+                                lastTime = millis();
+                        lastDir = Tech.Dir;
+                  }
+                   if(usStatus == 0 && Tech.Dir == 5)
+                  {
+                       //   Pun.stepUp();
+                      //    Pun.punch();
+                  }
+                  }
+                  }
+                  else
+                  {
+                        
+                        if(Tech.distB > 15)
+                       {
+                                while(!(Tech.UP(0) < 10 && Tech.UP(0) > -10))
+                                {
+                                        Tech.gyro()  ;
+                                        Tech.Distance();
+                                        Tech.move(90,0,Mreg.UI(Tech.UP(0)));
+                                }
+                                 if(Tech.distB > 15)
+                                {
+                                        if(Tech.distL >= 55 && Tech.distR >= 55)
+                                        {
+                                                if(Tech.distB > 15)
+                                                {
+                                                        Tech.Distance();
+                                                        Tech.gyro()  ;
+                                                        Tech.move(270,255,Mreg.UI(Tech.UP(0)));
+                                                }
+                                                else if(Tech.Dir != 6 && Tech.Dir != 5 && Tech.Dir != 4)
+                                                { 
+                                                        Tech.IRlego();
+                                                        Tech.gyro()  ;
+                                                        Tech.move(90,0,Mreg.UI(Tech.UP(0)));
+                                                }
+                                        }
+                                         else if(Tech.distL<Tech.distR )
+                                         {
+                                                if(Tech.distL<=55)
+                                                {
+                                                        Tech.gyro()  ;
+                                                        Tech.Distance();
+                                                        Serial2.println("NAZAD");
+                                                        Tech.move(180,200,Mreg.UI(Tech.UP(0)));
+                                               }
+                                         }
+                                         else if(Tech.distL>Tech.distR)
+                                         {
+                                                if(Tech.distR<=55)
+                                               {
+                                                      Tech.gyro();
+                                                      Tech.Distance();
+                                                      Tech.move(0,200,Mreg.UI(Tech.UP(0)));
+                                              }
+                                         } 
+                                }
+                        }
+                         else  if (Tech.Dir < 5  && Tech.Dir != 0)
+                         {
+                                Tech.move(0, 255, Mreg.UI(Tech.UP(0)));
+                                Serial2.println("VLEVO");
+                         }
+                         else if (Tech.Dir > 5)
+                         {
+                                Tech.move(180, 255, Mreg.UI(Tech.UP(0)));
+                                Serial2.println("VPRAVO");
+                         }
+                      
+                  }
   
 }
