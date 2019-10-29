@@ -14,12 +14,12 @@
 #define pwmC 4
 #define digital1C 5
 #define digital2C 6
-#define l1p A5
-#define l2p A6//A2
-#define l3p A7//A8
-#define l4p A0 //
-#define l5p A1//A1
-#define l6p A2//A2
+#define l1p A2
+#define l2p A1//A2
+#define l3p A0//A8
+#define l4p A7 //
+#define l5p A6//A1
+#define l6p A5//A2
 #define l7p A3
 #define l8p A4//5
 #define lap A9
@@ -101,9 +101,11 @@ class puncher{
 class Tech
 {
 	public:	
+		long millisGyro;
 		int ezet;
 		char lire;
-		String ceta;
+		bool protoco = 0;
+		String ceta = "";
 		void getBluetooth();
 		bool roboMod = 0;
 		int sector;
@@ -145,8 +147,22 @@ class Tech
 		void line();
 		void irCalibrate();
 		bool usTrue();
+		int angleGate();
 		
 };
+int Tech::angleGate(){
+	if(distR>25 && distR<70)
+	{
+		return  (atan((213 - distB)/(91-distR))*57);
+	}
+	else if(distL>25 && distL<70)
+	{
+		return -(atan((213 - distB)/(91-distL))*57);
+	}
+	else{
+		return 0;
+	}
+}
 Tech::Tech(bool debu, bool bluetoot){
 	Serial1.begin(115200);
 	Serial1.println("\n");
@@ -170,24 +186,42 @@ void Tech::getBluetooth()
 {
 	if(Serial2.available())
 	{
-		lire = (char)Serial2.read();
-		ceta += lire;
-		if (lire == '\n') {
-			if(debug){
-				Serial.println("ceta: ");
-				Serial.print(ceta);
+		if(protoco)
+		{		
+			lire = (char)Serial2.read();
+			ceta += lire;
+			if (lire == '\n') {
+				if(debug){
+					Serial.println("ceta: ");
+					Serial.print(ceta);
+				}
+				ezet=ceta.toInt();
+				ceta="";
+				if(ezet == 1){
+					roboMod = 1;
+				}
+				else if(ezet == 0){
+					roboMod = 0;
+					}
+				}
 			}
-			ezet=ceta.toInt();
-			ceta="";
-			if(ezet == 1){
-				roboMod = 1;
+			protoco = 0;
+		}
+		else
+		{
+			lire = (char)Serial2.read();
+			if(ceta.length() == 3 && lire == '\n')
+			{
+				protoco = 1;
+				ceta = "";
 			}
-			else if(ezet == 0){
-				roboMod = 0;
-			}
+			else if(lire == '6')
+				ceta += lire;
+			else
+				ceta = "";
+			
 		}
 	}
-}
 void Tech::eepromWrite()
 {
 	if(button1)
@@ -204,22 +238,7 @@ void Tech::sectorCount()
 {
 	if(usTrue())
 	{
-		if(distR >= 51 && distL > 51 && distB < 25)
-			sector = 2;
-		else if(distR <= 111 && distL < 51 && distB < 50)
-			sector = 1;
-		else if(distR <= 51 && distL < 111 && distB < 50)
-			sector = 3;
-		else if((distL <= 51 && distR > 111 && distB < 112) || (distL <= 81 && distR > 81 && distB < 82))  
-			sector = 6;
-		else if((distL <= 111 && distR > 51 && distB < 112) || (distL > 81 && distR <= 81 && distB < 82))  
-			sector = 7;
-		else if((distL <= 51 && distR > 111 && distB < 173) || (distL <= 81 && distR > 81 && distB < 143))  
-			sector = 4;
-		else if((distL <= 111 && distR > 51 && distB < 173) || (distL > 81 && distR <= 81 && distB < 143))  
-			sector = 5;
-		else if(((distR < 51 || distL < 51)  && distB >= 173) || (distR >= 51 && distL >= 51 && distB >= 143))  
-			sector = 8;
+
 	}
 	else
 		sector = 0;	
@@ -693,13 +712,18 @@ void Tech::diod(int number,int mode){
 }
 void Tech::gyro(){
 	if(Serial1.available()) {
+		millisGyro=millis();
 		c = (char)Serial1.read();
 		beta += c;
 		if (c == '\n') {
 			Serial1.print("\n");
-		if(debug&&li==99){
-			Serial.println("degree: ");
-			Serial.print(degree);
+		if(debug&&li==0){
+			Serial.print("degree: ");
+			Serial.println(degree);
+		}
+		if(bluetooth&&li==0){
+			Serial2.print("degree: ");
+			Serial2.println(degree);
 		}
 			Serial1.print("\n");
 			degree=beta.toInt();
@@ -716,11 +740,39 @@ void Tech::gyro(){
 			gyroD=0;
 		}
 		}
+	if(Serial1.available()==0&&millis()-millisGyro>500) {
+		Serial1.end();
+		Serial1.begin(115200);
+		Serial1.print("\n");
+	}
+	if(Serial1.available()==0&&millis()-millisGyro>1000) {
+		diod(2,1);
+	}
+	else{
+		diod(2,0);
+	}
 }
 bool Tech::usTrue()
 {
-	if(((distL + distR + 20)<182+10) && ((distL + distR + 20)>182-10)){
+	if(abs(distL + distR + 22)-182<10){
+		if(bluetooth&&li==98){
+			Serial2.print("usTrue: ");
+			Serial2.println(1);
+		}
+		if(debug&&li==98){
+			Serial.print("usTrue: ");
+			Serial.println(1);
+		}		
 		return 1;
+		
+		}
+		if(bluetooth&&li==98){
+		Serial2.print("usTrue: ");
+		Serial2.println(0);
+	}
+	if(debug&&li==98){
+		Serial.print("usTrue: ");
+		Serial.println(0);
 	}
 	return 0;  
 }
