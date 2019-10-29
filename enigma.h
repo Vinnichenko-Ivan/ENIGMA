@@ -236,16 +236,28 @@ void Tech::eepromWrite()
 }
 void Tech::sectorCount()
 {
+	sector = 0;	
 	if(usTrue())
 	{
-
+		if(distL>=51&&distR>=51&&distB<=10){sector=2;}
+		else if(distL<=51&&distR>=111&&distB<=40&&distB>30){sector=1;}
+		else if(distL>=111&&distR<=51&&distB<=40&&distB>30){sector=3;}
+		else if(distL>=51&&distR>=51&&distB>10){sector=5;}
+		else if(distL<=51&&distR>=111&&distB>40){sector=4;}
+		else if(distL>=111&&distR<=51&&distB>40){sector=6;}
+		else if(distL<=51&&distR>=111&&distB<30){sector=7;}
+		else if(distL>=111&&distR<=51&&distB<30){sector=8;}
 	}
 	else
 		sector = 0;	
-	if(bluetooth)
+	if(bluetooth&&li==92){
+		Serial2.print("sector");
 		Serial2.println(sector);
-
-
+		}
+	if(debug&&li==92){
+		Serial.print("sector");
+		Serial.println(sector);
+		}
 }
 void Tech::button(){
 button1 = !digitalRead(28);
@@ -754,7 +766,7 @@ void Tech::gyro(){
 }
 bool Tech::usTrue()
 {
-	if(abs(distL + distR + 22-182)<10&&distB!=0){
+	if(abs(distL + distR + 22-182)<10&&distB!=0&&abs(UP(0))<9){
 		if(bluetooth&&li==98){
 			Serial2.print("usTrue: ");
 			Serial2.println(1);
