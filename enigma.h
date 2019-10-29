@@ -754,7 +754,7 @@ void Tech::gyro(){
 }
 bool Tech::usTrue()
 {
-	if(abs(distL + distR + 22)-182<10){
+	if(abs(distL + distR + 22-182)<10&&distB!=0){
 		if(bluetooth&&li==98){
 			Serial2.print("usTrue: ");
 			Serial2.println(1);
