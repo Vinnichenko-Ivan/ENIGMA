@@ -5,15 +5,15 @@
 #define rightUs 37 //port right us
 #define backUs 35 //port back us
 #define delayUs 100 //delay betweem 
-#define pwmA 12
-#define digital1A 10
-#define digital2A 11
+#define pwmA 4
+#define digital1A 6
+#define digital2A 5
 #define pwmB 9
-#define digital1B 8 
-#define digital2B 7
-#define pwmC 4
-#define digital1C 5
-#define digital2C 6
+#define digital1B 7
+#define digital2B 8
+#define pwmC 10
+#define digital1C 11
+#define digital2C 12
 #define l1p A2
 #define l2p A1//A2
 #define l3p A0//A8
