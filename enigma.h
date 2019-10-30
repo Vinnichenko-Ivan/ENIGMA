@@ -69,6 +69,77 @@ double PID::UI(int error){
 //Serial.println(error*kp);
 	return error*kp +errorIntegral*ki+errorDeviante*kd;
 }
+class Tsop
+{
+	public:
+		short ball();
+		short buff[5];
+		void first( int port);
+		int portArduino;		
+		int count;
+};
+void Tsop::first( int port)
+{
+	if(port == 1)
+		portArduino=tsopPered1;
+	else if(port == 2)
+		portArduino=tsopPered2;
+	else if(port == 3)
+		portArduino=tsopPered3;
+	else if(port == 4)
+		portArduino=tsopZad1;
+	else if(port == 5)
+		portArduino=tsopZad2;
+}
+short Tsop::ball()
+{
+	short status;
+	count = 0;
+	int num;
+	for(int i = 0;i<10;i++)
+	{
+		if(portArduino == tsopZad2 || portArduino == tsopZad1)
+			num = pulseIn(portArduino,1,600);
+		else 
+			num = pulseIn(portArduino,1,1000);			
+		if(num!=0)
+		{
+			count = i;
+			break;
+		}	
+	}
+
+			Serial.print(count);
+			Serial.print(" ");
+	
+	if(count >= 4){
+		status = 1;
+	}
+	else{
+		status = 0;
+	}
+	bool ans;
+	if(portArduino == tsopZad2 || portArduino == tsopZad1)
+	{	
+		buff[0] = buff[1];
+		buff[1] = buff[2];
+		buff[2] = status;
+		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2];
+	}
+	else
+	{
+		buff[0] = buff[1];
+		buff[1] = buff[2];
+		buff[2] = buff[3];
+		buff[3] = buff[4];
+		buff[4] = status;
+		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2] + (bool)buff[3] + (bool)buff[4];
+	}
+
+	
+	return ans;
+	
+}
 
 class puncher{
 	private:
@@ -163,7 +234,7 @@ class Tech
 		unsigned long int timer;
 		int numUs=0,Dir,Str,li=0;
 		int US(char port);
-		void obezd(short tsop1,short tsop2,PID Mreg);
+		void obezd(Tsop tsop1,Tsop tsop2,PID Mreg);
 		int Distance();
 		int irDist;
 		int irDelta;
@@ -259,9 +330,9 @@ void Tech::getBluetooth()
 			
 		}
 	}
-void Tech::obezd(short tsop1,short tsop2,PID Mreg)
+void Tech::obezd(Tsop tsop1,Tsop tsop2,PID Mreg)
 {
-	if(tsop1 == 1 && tsop2 == 1 && tsopM == 0)
+	if(tsop1.ball() == 1 && tsop2.ball() == 1 && tsopM == 0)
     {
         if(tsopM == 1)
         {
@@ -284,21 +355,21 @@ void Tech::obezd(short tsop1,short tsop2,PID Mreg)
             tsopM = 0;
         } 
     }                        
-    else if(tsop1 == 1)
+    else if(tsop1.ball() == 1)
     {
         move(235, 255, Mreg.UI(UP(0)));      
         tsopM = 1;
     }
-    else if(tsop2 == 1)
+    else if(tsop2.ball() == 1)
     {
         move(315, 255, Mreg.UI(UP(0)));      
         tsopM = 2;
     }
-    else if(Dir == 0 && tsop1 == 0 && tsop2 == 0)
+    else if(Dir == 0 && tsop1.ball() == 0 && tsop2.ball() == 0)
     { 
         if(distL >= distR)
         {
-            while(Dir == 0 && tsop2 == 0 && tsop1 == 0)
+            while(Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
             {
                 gyro();
                 IRlego();
@@ -307,7 +378,7 @@ void Tech::obezd(short tsop1,short tsop2,PID Mreg)
         }
 	    else
 	    {
-	        while(Dir == 0 && tsop2 == 0 && tsop1 == 0)
+	        while(Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
 	        {
 	            gyro();
 	            IRlego();
@@ -980,75 +1051,4 @@ int Tech::US(char port){
 		return distance;
 	}
 
-}
-class Tsop
-{
-	public:
-		short ball();
-		short buff[5];
-		void first( int port);
-		int portArduino;		
-		int count;
-};
-void Tsop::first( int port)
-{
-	if(port == 1)
-		portArduino=tsopPered1;
-	else if(port == 2)
-		portArduino=tsopPered2;
-	else if(port == 3)
-		portArduino=tsopPered3;
-	else if(port == 4)
-		portArduino=tsopZad1;
-	else if(port == 5)
-		portArduino=tsopZad2;
-}
-short Tsop::ball()
-{
-	short status;
-	count = 0;
-	int num;
-	for(int i = 0;i<10;i++)
-	{
-		if(portArduino == tsopZad2 || portArduino == tsopZad1)
-			num = pulseIn(portArduino,1,600);
-		else 
-			num = pulseIn(portArduino,1,1000);			
-		if(num!=0)
-		{
-			count = i;
-			break;
-		}	
-	}
-
-			Serial.print(count);
-			Serial.print(" ");
-	
-	if(count >= 4){
-		status = 1;
-	}
-	else{
-		status = 0;
-	}
-	bool ans;
-	if(portArduino == tsopZad2 || portArduino == tsopZad1)
-	{	
-		buff[0] = buff[1];
-		buff[1] = buff[2];
-		buff[2] = status;
-		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2];
-	}
-	else
-	{
-		buff[0] = buff[1];
-		buff[1] = buff[2];
-		buff[2] = buff[3];
-		buff[3] = buff[4];
-		buff[4] = status;
-		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2] + (bool)buff[3] + (bool)buff[4];
-	}
-
-	
-	return ans;
-	
 }
