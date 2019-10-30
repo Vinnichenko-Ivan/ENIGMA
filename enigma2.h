@@ -5,15 +5,15 @@
 #define rightUs 37 //port right us
 #define backUs 35 //port back us
 #define delayUs 100 //delay betweem 
-#define pwmA 4
-#define digital1A 6
-#define digital2A 5
+#define pwmA 12
+#define digital1A 10
+#define digital2A 11
 #define pwmB 9
-#define digital1B 7
-#define digital2B 8
-#define pwmC 10
-#define digital1C 11
-#define digital2C 12
+#define digital1B 8 
+#define digital2B 7
+#define pwmC 4
+#define digital1C 5
+#define digital2C 6
 #define l1p A2
 #define l2p A1//A2
 #define l3p A0//A8
@@ -35,6 +35,7 @@
 #define tsopZad1 A10
 #define tsopZad2 A11
 #define colorK 30
+
 class puncher{
 	private:
 		
@@ -93,7 +94,7 @@ class puncher{
 		s=analogRead(optoPin);
 	}
 	bool puncher::ballTest(){
-		if(analogRead(optoPin)>400	)
+		if(analogRead(optoPin)<450	)
 			return 1;
 		else
 			return 0;	
@@ -106,6 +107,7 @@ class Tech
 		char lire;
 		bool protoco = 0;
 		String ceta = "";
+		short tsopM = 0;
 		void getBluetooth();
 		bool roboMod = 0;
 		int sector;
@@ -127,6 +129,7 @@ class Tech
 		unsigned long int timer;
 		int numUs=0,Dir,Str,li=0;
 		int US(char port);
+		void obezd();
 		int Distance();
 		int irDist;
 		int irDelta;
@@ -222,6 +225,70 @@ void Tech::getBluetooth()
 			
 		}
 	}
+void Tech::obezd()
+{
+	             if(tsop1.ball() == 1 && tsop2.ball() == 1 && tsopM == 0)
+                        {
+                                nextDir = 0;
+                                if(tsopM == 1)
+                                {
+                                        while(Tech.Dir == 9 || Tech.Dir == 8 || Tech.Dir == 0)
+                                        {
+                                                 Tech.IRlego();
+                                                 Tech.gyro();
+                                                 Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
+                                        }
+                                        tsopM = 0;
+                                }
+                                 else if(tsopM == 2)
+                                 {
+                                        while(Tech.Dir == 1 || Tech.Dir == 2 || Tech.Dir == 0)
+                                        {
+                                                 Tech.IRlego();
+                                                 Tech.gyro();
+                                                 Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
+                                        }
+                                        tsopM = 0;
+      
+                                 } 
+                        }                        
+                        else if(tsop1.ball() == 1)
+                        {
+                                nextDir = 0;
+                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));      
+                                tsopM = 1;
+                        }
+                         else if(tsop2.ball() == 1)
+                         {
+                                nextDir = 0;
+                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));      
+                                tsopM = 2;
+                         }
+                 
+                 
+                  else if(Tech.Dir == 0 && tsop1.ball() == 0 && tsop2.ball() == 0)
+                  { 
+                                nextDir = 0;
+                                if(Tech.distL >= Tech.distR)
+                                {
+                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
+                                        {
+                                                Tech.gyro();
+                                                Tech.IRlego();
+                                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
+                                        }      
+                                }
+                                else
+                                {
+                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
+                                        {
+                                                Tech.gyro();
+                                                Tech.IRlego();
+                                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
+                                        }      
+                                }
+                  }
+}
 void Tech::eepromWrite()
 {
 	if(button1)
@@ -891,7 +958,7 @@ class Tsop
 {
 	public:
 		short ball();
-		short buff[3];
+		short buff[5];
 		void first( int port);
 		int portArduino;		
 		int count;
@@ -912,25 +979,49 @@ void Tsop::first( int port)
 short Tsop::ball()
 {
 	short status;
+	count = 0;
+	int num;
 	for(int i = 0;i<10;i++)
 	{
-		int num = pulseIn(portArduino,1,1000);
+		if(portArduino == tsopZad2 || portArduino == tsopZad1)
+			num = pulseIn(portArduino,1,600);
+		else 
+			num = pulseIn(portArduino,1,1000);			
 		if(num!=0)
 		{
 			count = i;
 			break;
 		}	
 	}
+
+			Serial.print(count);
+			Serial.print(" ");
+	
 	if(count >= 4){
 		status = 1;
 	}
 	else{
 		status = 0;
 	}
-	buff[0] = buff[1];
-	buff[1] = buff[2];
-	buff[2] = status;
-	bool ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2];
+	bool ans;
+	if(portArduino == tsopZad2 || portArduino == tsopZad1)
+	{	
+		buff[0] = buff[1];
+		buff[1] = buff[2];
+		buff[2] = status;
+		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2];
+	}
+	else
+	{
+		buff[0] = buff[1];
+		buff[1] = buff[2];
+		buff[2] = buff[3];
+		buff[3] = buff[4];
+		buff[4] = status;
+		ans = (bool)buff[0] + (bool)buff[1] + (bool)buff[2] + (bool)buff[3] + (bool)buff[4];
+	}
+
+	
 	return ans;
 	
 }
