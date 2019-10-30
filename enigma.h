@@ -35,6 +35,40 @@
 #define tsopZad1 A10
 #define tsopZad2 A11
 #define colorK 30
+class PID{
+	public:
+		double ki=0,kp=0,kd=0,imax=0;
+		double error,errorOld,errorIntegral,errorDeviante;	
+		unsigned long dt,dn;
+		void first(float kpc,float kic,float kdc,float imaxc);
+		double UI(int error);
+};
+void PID::first(float kpc,float kic,float kdc,float imaxc){
+	ki=kic;
+	kp=kpc;
+	kd=kdc;
+	imax=imaxc;
+}
+double PID::UI(int error){
+	
+	errorIntegral+=error;//*(millis()-dt);
+	if(errorIntegral>imax){
+		errorIntegral=imax;
+	}
+	if(errorIntegral<-imax){
+		errorIntegral=-imax;
+	}
+	errorDeviante=(error-errorOld);
+	errorOld=error;
+	dt=millis();
+//Serial.print(" error ");
+//Serial.print(errorDeviante*kd);
+//Serial.print(" error ");
+//Serial.print(errorIntegral*ki);
+//Serial.print(" error ");
+//Serial.println(error*kp);
+	return error*kp +errorIntegral*ki+errorDeviante*kd;
+}
 
 class puncher{
 	private:
@@ -129,7 +163,7 @@ class Tech
 		unsigned long int timer;
 		int numUs=0,Dir,Str,li=0;
 		int US(char port);
-		void obezd();
+		void obezd(short tsop1,short tsop2,PID Mreg);
 		int Distance();
 		int irDist;
 		int irDelta;
@@ -225,69 +259,62 @@ void Tech::getBluetooth()
 			
 		}
 	}
-void Tech::obezd()
+void Tech::obezd(short tsop1,short tsop2,PID Mreg)
 {
-	             if(tsop1.ball() == 1 && tsop2.ball() == 1 && tsopM == 0)
-                        {
-                                nextDir = 0;
-                                if(tsopM == 1)
-                                {
-                                        while(Tech.Dir == 9 || Tech.Dir == 8 || Tech.Dir == 0)
-                                        {
-                                                 Tech.IRlego();
-                                                 Tech.gyro();
-                                                 Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
-                                        }
-                                        tsopM = 0;
-                                }
-                                 else if(tsopM == 2)
-                                 {
-                                        while(Tech.Dir == 1 || Tech.Dir == 2 || Tech.Dir == 0)
-                                        {
-                                                 Tech.IRlego();
-                                                 Tech.gyro();
-                                                 Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
-                                        }
-                                        tsopM = 0;
-      
-                                 } 
-                        }                        
-                        else if(tsop1.ball() == 1)
-                        {
-                                nextDir = 0;
-                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));      
-                                tsopM = 1;
-                        }
-                         else if(tsop2.ball() == 1)
-                         {
-                                nextDir = 0;
-                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));      
-                                tsopM = 2;
-                         }
-                 
-                 
-                  else if(Tech.Dir == 0 && tsop1.ball() == 0 && tsop2.ball() == 0)
-                  { 
-                                nextDir = 0;
-                                if(Tech.distL >= Tech.distR)
-                                {
-                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
-                                        {
-                                                Tech.gyro();
-                                                Tech.IRlego();
-                                                Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
-                                        }      
-                                }
-                                else
-                                {
-                                        while(Tech.Dir == 0 && tsop2.ball() == 0 && tsop1.ball() == 0)
-                                        {
-                                                Tech.gyro();
-                                                Tech.IRlego();
-                                                Tech.move(235, 255, Mreg.UI(Tech.UP(0)));
-                                        }      
-                                }
-                  }
+	if(tsop1 == 1 && tsop2 == 1 && tsopM == 0)
+    {
+        if(tsopM == 1)
+        {
+            while(Dir == 9 || Dir == 8 || Dir == 0)
+            {
+                IRlego();
+                gyro();
+                move(315, 255, Mreg.UI(UP(0)));
+            }
+            tsopM = 0;
+            }
+        else if(tsopM == 2)
+        {
+            while(Dir == 1 || Dir == 2 || Dir == 0)
+            {
+                IRlego();
+                gyro();
+                move(235, 255, Mreg.UI(UP(0)));
+            }
+            tsopM = 0;
+        } 
+    }                        
+    else if(tsop1 == 1)
+    {
+        move(235, 255, Mreg.UI(UP(0)));      
+        tsopM = 1;
+    }
+    else if(tsop2 == 1)
+    {
+        move(315, 255, Mreg.UI(UP(0)));      
+        tsopM = 2;
+    }
+    else if(Dir == 0 && tsop1 == 0 && tsop2 == 0)
+    { 
+        if(distL >= distR)
+        {
+            while(Dir == 0 && tsop2 == 0 && tsop1 == 0)
+            {
+                gyro();
+                IRlego();
+                move(315, 255, Mreg.UI(UP(0)));
+            }      
+        }
+	    else
+	    {
+	        while(Dir == 0 && tsop2 == 0 && tsop1 == 0)
+	        {
+	            gyro();
+	            IRlego();
+	            move(235, 255, Mreg.UI(UP(0)));
+	        }      
+	    }
+    }
 }
 void Tech::eepromWrite()
 {
@@ -1024,38 +1051,4 @@ short Tsop::ball()
 	
 	return ans;
 	
-}
-class PID{
-	public:
-		double ki=0,kp=0,kd=0,imax=0;
-		double error,errorOld,errorIntegral,errorDeviante;	
-		unsigned long dt,dn;
-		void first(float kpc,float kic,float kdc,float imaxc);
-		double UI(int error);
-};
-void PID::first(float kpc,float kic,float kdc,float imaxc){
-	ki=kic;
-	kp=kpc;
-	kd=kdc;
-	imax=imaxc;
-}
-double PID::UI(int error){
-	
-	errorIntegral+=error;//*(millis()-dt);
-	if(errorIntegral>imax){
-		errorIntegral=imax;
-	}
-	if(errorIntegral<-imax){
-		errorIntegral=-imax;
-	}
-	errorDeviante=(error-errorOld);
-	errorOld=error;
-	dt=millis();
-//Serial.print(" error ");
-//Serial.print(errorDeviante*kd);
-//Serial.print(" error ");
-//Serial.print(errorIntegral*ki);
-//Serial.print(" error ");
-//Serial.println(error*kp);
-	return error*kp +errorIntegral*ki+errorDeviante*kd;
 }
