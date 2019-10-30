@@ -191,7 +191,7 @@ void Tech::getBluetooth()
 			lire = (char)Serial2.read();
 			ceta += lire;
 			if (lire == '\n') {
-				if(debug){
+				if(debug&&li==94){
 					Serial.println("ceta: ");
 					Serial.print(ceta);
 				}
@@ -239,10 +239,10 @@ void Tech::sectorCount()
 	sector = 0;	
 	if(usTrue())
 	{
-		if(distL>=51&&distR>=51&&distB<=10){sector=2;}
+		if(distL>=51&&distR>=51&&distB<=15){sector=2;}
 		else if(distL<=51&&distR>=111&&distB<=40&&distB>30){sector=1;}
 		else if(distL>=111&&distR<=51&&distB<=40&&distB>30){sector=3;}
-		else if(distL>=51&&distR>=51&&distB>10){sector=5;}
+		else if(distL>=51&&distR>=51&&distB>15){sector=5;}
 		else if(distL<=51&&distR>=111&&distB>40){sector=4;}
 		else if(distL>=111&&distR<=51&&distB>40){sector=6;}
 		else if(distL<=51&&distR>=111&&distB<30){sector=7;}
@@ -293,8 +293,9 @@ int Tech::UP(int skos){
 		currentAzimut = 360 + (azimut+skos);
 	else
 		currentAzimut = azimut + skos;
-	//if(bluetooth)
-		Serial.println(currentAzimut);	
+	//if(bluetooth){
+	//	Serial.println(currentAzimut);
+	//}	
 	return (degree+540-currentAzimut)%360-180;
 }
 void Tech::irCalibrate()
@@ -366,17 +367,10 @@ else if(l1b||l2b){
       a=180;
   }*/
 	line();
-	if((l7b == 1 || l8b == 1) && (a >= 0 && a <= 180))
+	if((l7b == 1 || l8b == 1))
 	{
-	
-		power = 0;
-	}
-	else if(l3b == 1 && l6b == 1 && (a <= 360 && a >= 180))
-		power = 0;
-	else if(l2b == 1 && l5b == 1 && (a <= 360 && a >= 180))
-	{
-		power = 200;
-		a = 90;
+		power = 255;
+		a=270;
 	}
 	else if(l1b == 1 && l4b == 1 && (a <= 360 && a >= 180))
 	{
@@ -389,6 +383,15 @@ else if(l1b||l2b){
 		} 
 		return;
 	}
+	
+	else if(l2b == 1 && l5b == 1 && (a <= 360 && a >= 180))
+	{
+		power = 200;
+		a = 90;
+	}
+	else if(l3b == 1 && l6b == 1 && (a <= 360 && a >= 180))
+		power = 0;
+
 	else if(l3b == 1 && (a >= 90 && a <= 270))
 		power = 0;
 	else if(l2b == 1 && (a >= 90 && a <= 270))
@@ -408,9 +411,9 @@ else if(l1b||l2b){
 		} 
 		return;
 	}
-	else if(l6b == 1 && (a >= 90 && a <= 270))
+	else if(l6b == 1 && ((a <= 90) || (a <= 360 &&  a >= 270)))
 		power = 0;
-	else if(l5b == 1 && (a >= 90 && a <= 270))
+	else if(l5b == 1 && ((a <= 90) || (a <= 360 &&  a >= 270)))
 	{
 		power = 200;
 		a = 180;
@@ -608,7 +611,6 @@ void Tech::line(){
 		Serial.print(l1);
 		Serial.print(" l2: ");
 		Serial.print(l2);
-		Serial.print(" l3: ");
 		Serial.print(l3);
 		Serial.print(" l4: ");
 		Serial.print(l4);
@@ -729,11 +731,11 @@ void Tech::gyro(){
 		beta += c;
 		if (c == '\n') {
 			Serial1.print("\n");
-		if(debug&&li==0){
+		if(debug&&li==4){
 			Serial.print("degree: ");
 			Serial.println(degree);
 		}
-		if(bluetooth&&li==0){
+		if(bluetooth&&li==4){
 			Serial2.print("degree: ");
 			Serial2.println(degree);
 		}
@@ -934,8 +936,8 @@ short Tsop::ball()
 }
 class PID{
 	public:
-		float ki=0,kp=0,kd=0,imax=0;
-		long error,errorOld,errorIntegral,errorDeviante;	
+		double ki=0,kp=0,kd=0,imax=0;
+		double error,errorOld,errorIntegral,errorDeviante;	
 		unsigned long dt,dn;
 		void first(float kpc,float kic,float kdc,float imaxc);
 		double UI(int error);
@@ -947,16 +949,22 @@ void PID::first(float kpc,float kic,float kdc,float imaxc){
 	imax=imaxc;
 }
 double PID::UI(int error){
-	dn=millis();
-	errorIntegral+=error*(dn-dt);
+	
+	errorIntegral+=error;//*(millis()-dt);
 	if(errorIntegral>imax){
 		errorIntegral=imax;
 	}
 	if(errorIntegral<-imax){
 		errorIntegral=-imax;
 	}
-	errorDeviante=(error-errorOld)/(dn-dt);
+	errorDeviante=(error-errorOld);
 	errorOld=error;
 	dt=millis();
+Serial.print(" error ");
+Serial.print(errorDeviante*kd);
+Serial.print(" error ");
+Serial.print(errorIntegral*ki);
+Serial.print(" error ");
+Serial.println(error*kp);
 	return error*kp +errorIntegral*ki+errorDeviante*kd;
 }
