@@ -960,11 +960,11 @@ double PID::UI(int error){
 	errorDeviante=(error-errorOld);
 	errorOld=error;
 	dt=millis();
-Serial.print(" error ");
-Serial.print(errorDeviante*kd);
-Serial.print(" error ");
-Serial.print(errorIntegral*ki);
-Serial.print(" error ");
-Serial.println(error*kp);
+//Serial.print(" error ");
+//Serial.print(errorDeviante*kd);
+//Serial.print(" error ");
+//Serial.print(errorIntegral*ki);
+//Serial.print(" error ");
+//Serial.println(error*kp);
 	return error*kp +errorIntegral*ki+errorDeviante*kd;
 }
