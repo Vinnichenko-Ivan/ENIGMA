@@ -1,3 +1,4 @@
+
 #include <Wire.h> //Include the Wire Library
 #include <HTInfraredSeeker.h>
 #include <EEPROM.h>
@@ -34,7 +35,7 @@
 #define tsopPered3 A14
 #define tsopZad1 A10
 #define tsopZad2 A11
-#define colorK 30
+#define colorK 15
 class PID{
 	public:
 		double ki=0,kp=0,kd=0,imax=0;
@@ -109,8 +110,7 @@ short Tsop::ball()
 		}	
 	}
 
-			Serial.print(count);
-			Serial.print(" ");
+
 	
 	if(count >= 4){
 		status = 1;
@@ -402,19 +402,19 @@ void Tech::eepromWrite()
 void Tech::sectorCount()
 {
 	sector = 0;	
-	if(usTrue())
-	{
-		if(distL>=51&&distR>=51&&distB<=15){sector=2;}
-		else if(distL<=51&&distR>=111&&distB<=40&&distB>30){sector=1;}
-		else if(distL>=111&&distR<=51&&distB<=40&&distB>30){sector=3;}
+	//if(usTrue())
+	//{
+		if(distL>=51&&distR>=51&&distB<=10){sector=2;}
+		else if(distL<=51&&distR>=111&&distB<=45&&distB>35){sector=1;}
+		else if(distL>=111&&distR<=51&&distB<=45&&distB>35){sector=3;}
 		else if(distL>=51&&distR>=51&&distB>15){sector=5;}
-		else if(distL<=51&&distR>=111&&distB>40){sector=4;}
-		else if(distL>=111&&distR<=51&&distB>40){sector=6;}
+		else if(distL<=51&&distR>=111&&distB>45){sector=4;}
+		else if(distL>=111&&distR<=51&&distB>45){sector=6;}
 		else if(distL<=51&&distR>=111&&distB<30){sector=7;}
 		else if(distL>=111&&distR<=51&&distB<30){sector=8;}
-	}
-	else
-		sector = 0;	
+	//}
+	//else
+	//	sector = 0;	
 	if(bluetooth&&li==92){
 		Serial2.print("sector");
 		Serial2.println(sector);
@@ -532,70 +532,28 @@ else if(l1b||l2b){
       a=180;
   }*/
 	line();
-	if((l7b == 1 || l8b == 1))
-	{
-		power = 255;
-		a=270;
-	}
-	else if(l1b == 1 && l4b == 1 && (a <= 360 && a >= 180))
-	{
-		while((l3b == 1 && l6b == 1) || (l1b == 1 && l4b == 1)  || (l2b == 1 && l5b == 1))
-		{
 
-			line();
-			gyro();
-			angleDrive(90,255,error);	
-		} 
-		return;
-	}
-	
-	else if(l2b == 1 && l5b == 1 && (a <= 360 && a >= 180))
+	if((l1b ||l2b||l3b )&&( l4b||l5b||l6b ))
 	{
-		power = 200;
-		a = 90;
-	}
-	else if(l3b == 1 && l6b == 1 && (a <= 360 && a >= 180))
-		power = 0;
+		angleDrive(90,255,error);
 
-	else if(l3b == 1 && (a >= 90 && a <= 270))
-		power = 0;
-	else if(l2b == 1 && (a >= 90 && a <= 270))
+	}
+	else if(l3b||l2b||l1b){
+		angleDrive(0,255,error);
+	}
+	else if(l4b||l5b||l6b){
+		angleDrive(180,255,error);
+
+	}
+
+ 	else if((l7b == 1 || l8b == 1))
 	{
-		power = 200;
-		a = 0;
-	}
-	else if(l1b == 1)
-	{	
-		long long int start = millis();
-		while(l1b == 1 || l2b == 1 || l3b == 1)
-		{
 
-			line();
-			gyro();
-			angleDrive(0,255,UP(0)*5);	
-		} 
-		return;
+		angleDrive(270,255,error);
+		delay(100);
 	}
-	else if(l6b == 1 && ((a <= 90) || (a <= 360 &&  a >= 270)))
-		power = 0;
-	else if(l5b == 1 && ((a <= 90) || (a <= 360 &&  a >= 270)))
-	{
-		power = 200;
-		a = 180;
-	}
-	else if(l4b == 1)
-	{	
-
-		while(l4b == 1 || l5b == 1 || l6b == 1)
-		{
-
-			line();
-			gyro();
-			angleDrive(180,255,error);	
-		} 
-		return;
-	}
-	angleDrive(a,power,error);
+	else		
+		angleDrive(a,power,error);
 	
 		
 }
@@ -755,7 +713,7 @@ void Tech::line(){
 
 	li++;
 	if(debug&&li==100){
-		Serial.print(" l1: ");
+		Serial.print(" l1b: ");
 		Serial.print(l1b);
 		Serial.print(" l2: ");
 		Serial.print(l2b);
@@ -790,7 +748,7 @@ void Tech::line(){
 		li=-1;
 	}
 	if(bluetooth&&li==-1){
-		Serial2.print(" l1: ");
+		Serial2.print(" l1b: ");
 		Serial2.print(l1b);
 		Serial2.print(" l2: ");
 		Serial2.print(l2b);
@@ -957,7 +915,7 @@ bool Tech::usTrue()
 }
 
 int Tech::Distance(){
-	if(debug&&li==99){
+	if(debug&&li==40){
 		Serial.print(" distL: ");
 		Serial.print(distL);
 		Serial.print(" distB: ");
@@ -965,7 +923,7 @@ int Tech::Distance(){
 		Serial.print(" distR: ");
 		Serial.println(distR);
 	}
-	if(bluetooth&&li==99){
+	if(bluetooth&&li==40){
 		Serial2.print(" distL: ");
 		Serial2.print(distL);
 		Serial2.print(" distB: ");
