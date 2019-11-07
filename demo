@@ -1,0 +1,208 @@
+
+#include <Enigma.h>
+#include<math.h>
+Tech Tech(1, 1);
+PID Mreg;
+puncher Pun;
+int attach = 150;
+bool punchA = 0, punch = 0, punchB = 0, punchC = 0;
+int left = 0, right = 0, straight = 0, back = 0;
+Tsop tsop1;
+Tsop tsop2;
+Tsop tsop3;
+Tsop tsop4;
+Tsop tsop5;
+int dirOld = 5;
+short tsopM = 0;
+bool modes[20];
+long timerA, timerZone;
+void setup() {
+  // put your setup code here, to run once:
+  tsop1.first(4);
+  tsop2.first(5);
+  tsop3.first(1);
+  tsop4.first(2);
+  tsop5.first(3);
+  Tech.first(0, 0);
+  Mreg.first(5, 0, 0, 100);
+  delay(100);
+  Pun.S();
+  pinMode(53, OUTPUT);
+  Serial.begin(115200);
+  Serial2.begin(9600);
+}
+void sensors() {
+  Tech.IRlego();
+  Tech.gyro();
+  Tech.line();
+  Tech.Distance();
+  Tech.usTrue();
+  Pun.stepUp();
+  Tech.sectorCount();
+}
+bool mode = 0;
+long long int timer = 0;
+void loop() {
+  //
+  sensors();
+//  Serial.println(Tech.Str);
+//  Serial.println(punchA);
+//  Serial.println(punchB);
+//  Serial.println(Tech.Dir );
+  //Pun.punch();
+  if (punchB) {
+    Pun.punch();
+    if(Pun.ballTest()==0){
+        punchB=0;
+        }
+    if (Tech.Dir == 5) {
+      Tech.move(90, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir == 4) {
+      Tech.move(45, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir == 6) {
+      Tech.move(135, 255, Mreg.UI(Tech.UP(0)));
+    }
+    else {
+      punchB = 0;
+    }
+  }
+  else if (Tech.Dir == 0) {
+    Tech.move(90, 0, Mreg.UI(Tech.UP(0)));
+  }
+  else if (Tech.distL >= 51 && Tech.distR >= 51 && Tech.distB <= 10 && punchB == 0) {
+    //Serial2.println("Sector 2 <10");
+    if (Tech.Dir < 5 && Tech.Dir != 0) {
+      Tech.move(45, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir > 5) {
+      Tech.move(135, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir == 5) {
+      Tech.move(90, 255, Mreg.UI(Tech.UP(0)));
+    }
+  }
+  else if (Tech.distL >= 51 && Tech.distR >= 51 && Tech.distB >= 20 && punchB == 0) {
+    // Serial2.println("Sector 2 >20");
+    if (Tech.Dir < 5 && Tech.Dir != 0) {
+      Tech.move(315, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir > 5) {
+      Tech.move(225, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir == 5) {
+      Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+    }
+  }
+  else if (Tech.distL >= 51 && Tech.distR >= 51 && punchB == 0) {
+    //  Serial2.println("Sector 2 >10");
+    if (Tech.Dir < 5 && Tech.Dir != 0) {
+      Tech.move(0, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir > 5) {
+      Tech.move(180, 255, Mreg.UI(Tech.UP(0)));
+    }
+    if (Tech.Dir == 5) {
+      Tech.move(90, 0, Mreg.UI(Tech.UP(0)));
+    }
+  }
+  else {
+    if (Tech.distB <= 40 && punchB == 0) {
+      //Serial2.println("Sector 2 <10");
+      if (Tech.Dir < 5 && Tech.Dir != 0) {
+        Tech.move(45, 255, Mreg.UI(Tech.UP(0)));
+      }
+      if (Tech.Dir > 5) {
+        Tech.move(135, 255, Mreg.UI(Tech.UP(0)));
+      }
+      if (Tech.Dir == 5) {
+        Tech.move(90, 255, Mreg.UI(Tech.UP(0)));
+      }
+    }
+    else if ( Tech.distB >= 50 && punchB == 0) {
+      // Serial2.println("Sector 2 >20");
+      if (Tech.Dir == 5 && Tech.Str > attach && punch == 0)
+      {
+        punch = 1;
+        Tech.move(270, 0, Mreg.UI(Tech.UP(0)));
+      }
+      else  if (Tech.Dir == 5 && Tech.distB > 45 && punch == 0)
+      {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)) && punch == 0);
+        Serial.println("error");
+      }
+      else  if (Tech.Dir == 5 && Tech.distB < 35)
+      {
+        Tech.move(90, 255, Mreg.UI(Tech.UP(0)) && punch == 0);
+        Serial.println("error");
+      }
+      else  if (Tech.Dir == 5)
+      {
+        Tech.move(270, 0, Mreg.UI(Tech.UP(0)) && punch == 0);
+      }
+      else if (Tech.Dir == 6) {
+        Tech.move(180, 255, Mreg.UI(Tech.UP(0)) && punch == 0);
+      }
+      else if (Tech.Dir == 7) {
+        Tech.move(200, 255, Mreg.UI(Tech.UP(0)) && punch == 0);
+      }
+      else if (Tech.Dir == 8) {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+
+      }
+      else if (Tech.Dir == 9) {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+
+      }
+      else if (Tech.Dir == 4) {
+        Tech.move(0, 255, Mreg.UI(Tech.UP(0)));
+      }
+      else if (Tech.Dir == 3) {
+        Tech.move(340, 255, Mreg.UI(Tech.UP(0)));
+      }
+      else if (Tech.Dir == 2) {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+      }
+      else if (Tech.Dir == 1) {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+      }
+      else if (Tech.Dir == 0) {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+      }
+      else {
+        Tech.move(270, 255, Mreg.UI(Tech.UP(0)));
+      }
+    }
+    else  {
+      //  Serial2.println("Sector 2 >10");
+      if (Tech.Dir < 5 && Tech.Dir != 0 && punchB == 0) {
+        Tech.move(0, 255, Mreg.UI(Tech.UP(0)));
+      }
+      if (Tech.Dir > 5 && punchB == 0) {
+        Tech.move(180, 255, Mreg.UI(Tech.UP(0)));
+      }
+      if (Tech.Dir == 5 && punchB == 0) {
+        Tech.move(90, 0, Mreg.UI(Tech.UP(0)));
+      }
+    }
+  }
+  if (Tech.Dir == 5 && Tech.Str > attach) {
+    timerA = millis();
+    punchA = 1;
+  }
+  else {
+    punchA = 0;
+  }
+  if (dirOld != Tech.Dir && Tech.Dir != 0||punchB) {
+    timerZone = millis();
+    dirOld = Tech.Dir;
+  }
+  if (Tech.Dir != 5 && Tech.Dir != 4 && Tech.Dir != 6) {
+    punchB = 0;
+  }
+  if ( millis() - timerZone  > 3000) {
+    punchB = 1;
+  }
+
+}
