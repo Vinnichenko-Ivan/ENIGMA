@@ -29,7 +29,7 @@
 #define SignalDiod3 31
 #define PupPin 53
 #define punchPin 52
-#define optoPin A9
+#define optoPin A8
 #define tsopPered1 A13
 #define tsopPered2 A12
 #define tsopPered3 A14
@@ -168,11 +168,8 @@ class puncher{
 
 	}
 	void puncher::punch(){
-		if(volt==2&&ballTest()&&millis()-time>1000){
-			digitalWrite(52,1);
-			delay(500);
-			digitalWrite(52,0);
-			volt=0;
+		if(ballTest()==0&&millis()-time>2000){
+			Hpunch();
 			time=millis();	
 		}	
 		else{
@@ -186,7 +183,7 @@ class puncher{
 			timeOld=millis();
 			volt=1;
 		}
-		if(millis()-timeOld>1000&&volt==1) {
+		if(millis()-timeOld>2000&&volt==1) {
 			volt=2;
 			pinMode(PupPin,OUTPUT);
 			digitalWrite(PupPin,0);					
@@ -199,7 +196,7 @@ class puncher{
 		s=analogRead(optoPin);
 	}
 	bool puncher::ballTest(){
-		if(analogRead(optoPin)<450	)
+		if(analogRead(optoPin)<300	)
 			return 1;
 		else
 			return 0;	
@@ -207,6 +204,7 @@ class puncher{
 class Tech
 {
 	public:	
+		int counterr=0;
 		long millisGyro;
 		int ezet;
 		char lire;
@@ -852,7 +850,15 @@ void Tech::gyro(){
 		millisGyro=millis();
 		c = (char)Serial1.read();
 		beta += c;
+		counterr++;
+		if(counterr==100){
+			counterr=0;
+			Serial1.end();
+			Serial1.begin(115200);
+			Serial1.print("\n");
+		}
 		if (c == '\n') {
+			
 			Serial1.print("\n");
 		if(debug&&li==4){
 			Serial.print("degree: ");
