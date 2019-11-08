@@ -15,10 +15,10 @@ void setup() {
           tsop3.first(1);
           tsop4.first(2);
           tsop5.first(3);
-          Mreg.first(5, 0, 0, 3000);
+          Mreg.first(3, 0, 0, 3000);
           delay(100);
           Pun.S();
-          Serial.begin(115200);
+          //Serial.begin(115200);
           //Serial2.begin(9600);
 }
 bool gameMode = 0;
@@ -74,7 +74,7 @@ void loop() {
                             gateAngle = Tech.angleGate();
                             usStatus = 1;         
                         }
-                        if(tsop4.ball() == 1 && Tech.Dir == 5)
+                       /* if(tsop4.ball() == 1 && Tech.Dir == 5)
                         {
 
                                   Tech.IRlego();
@@ -83,8 +83,10 @@ void loop() {
                                   {
                                           Tech.gyro();
                                           Tech.move(90, 255, Mreg.UI(Tech.UP(0)));
+                                          if(Pun.ballTest())
+                                            break;
                                   }
-                        }
+                        }*/
                         else if(tsop1.ball() == 1 && tsop2.ball() == 1 && tsopM == 0 )
                         {
                           Serial.println("HERE");
@@ -142,27 +144,48 @@ void loop() {
                   {
                         long long int cd = millis();
                         while(millis() - cd < 150)
-                        {                              
-                                Tech.gyro();
-                                if(lastDir == Tech.Dir && lastDir == 0)
+                        {      
+                                if(Pun.ballTest() && abs(Tech.angleGate()) > 5 && Tech.usTrue())
                                 {
+                                        gateAngle = Tech.angleGate();
+                                        usStatus = 1;
+                                        break;         
+                                }                        
+                                
+                               
+                                else if(lastDir == Tech.Dir && lastDir == 0)
+                                {
+                                    Tech.gyro();
                                     if(usZeroStatus == 0)
                                         Tech.move(270 - map(min(millis() - lastTime,2000)* min(millis() - lastTime,2000),0,1000000,0,40), 255, Mreg.UI(Tech.UP(0)));
                                     else 
                                         Tech.move(270 + map(min(millis() - lastTime,2000)* min(millis() - lastTime,2000),0,4000000,0,40), 255, Mreg.UI(Tech.UP(0)));
                                 }
                                 else if(Tech.Dir > 6)
+                                {
+                                        Tech.gyro();
                                         Tech.move(angleArr[Tech.Dir] - map(min(millis() - lastTime,1000)* min(millis() - lastTime,1000),0,1000000,0,50), 255, Mreg.UI(Tech.UP(0)));
+                                }
                                 else if(Tech.Dir < 4)
+                                {
+                                        Tech.gyro();
                                         Tech.move(angleArr[Tech.Dir] + map(min(millis() - lastTime,1000)* min(millis() - lastTime,1000),0,1000000,0,50), 255, Mreg.UI(Tech.UP(0)));
+                                }
                                 else
                                 {
-                                    if(Tech.Dir>5) 
-                                        Tech.move(180, 255, Mreg.UI(Tech.UP(0)));
+                                    Tech.gyro();
+                                    if(Tech.Dir>5)
+                                    { 
+                                        Tech.IRlego();
+                                        Tech.move(180, 255 - map(Tech.Str,70,100,0,60), Mreg.UI(Tech.UP(0)));
+                                    }
                                     else if(Tech.Dir==5) 
                                         Tech.move(90, 255, Mreg.UI(Tech.UP(0)));
-                                    else if(Tech.Dir<5) 
-                                        Tech.move(0, 255, Mreg.UI(Tech.UP(0)));        
+                                    else if(Tech.Dir<5)
+                                    {
+                                        Tech.IRlego(); 
+                                        Tech.move(0, 255 - map(Tech.Str,70,100,0,60), Mreg.UI(Tech.UP(0)));
+                                    }        
                                 }
                         }
                         if((((lastDir < 7 &&  lastDir > 3) || lastDir) || (abs(Tech.Dir - lastDir) > 1))  && (Tech.Dir < 4 &&  Tech.Dir > 6 && Tech.Dir != 0))
