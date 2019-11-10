@@ -1,0 +1,158 @@
+#include<Enigma2.h>
+Tech Tech(0, 0);
+PID Mreg;
+Tsop tsop1;
+Tsop tsop2;
+Tsop tsop3;
+Tsop tsop4;
+Tsop tsop5;
+int currentStr;
+puncher Pun;
+int sectorLen;
+void setup() {
+          Tech.first(0, 0);
+          tsop1.first(4);
+          tsop2.first(5);
+          tsop3.first(1);
+          tsop4.first(2);
+          tsop5.first(3);
+          Mreg.first(3, 0, 0, 3000);
+          delay(100);
+          Pun.S();
+          bool butArr[3] = {0,0,0};
+          while(!Tech.button1)
+          {
+            Tech.gyro() ;
+              Tech.button();
+              if(Tech.button1)
+              {
+                  Tech.IRlego();
+                  currentStr = Tech.Str;
+              }    
+          }
+          delay(500);
+          Tech.diod(3,1);
+          long long int stIter = millis();
+          while((millis() - stIter < 5000)|| (butArr[0] == 0 && butArr[1] == 0 && butArr[2] == 0)  )
+          {
+            Tech.gyro() ;
+              Tech.button();
+              if(Tech.button1 == 1 || Tech.button2 == 1 || Tech.button3 == 1)
+                  stIter = millis();
+              if(Tech.button1)
+                  butArr[0] = 1;
+              if(Tech.button2)
+                  butArr[1] = 1;
+              if(Tech.button3)
+                  butArr[2] = 1;     
+              if(butArr[0] && butArr[1])
+              {
+                  sectorLen = 96;
+                  break;
+              }
+              else if(butArr[0] && butArr[2])
+              {
+                  sectorLen = 106;
+                  break;
+              }
+              else if(butArr[1] && butArr[2])
+              {
+                  sectorLen = 116;
+                  break;
+              }
+              else if(butArr[0])
+                  sectorLen = 66;
+              else if(butArr[1])
+                  sectorLen = 76;
+              else if(butArr[2])
+                  sectorLen = 86;                          
+          }
+          Tech.diod(2,1);
+ 
+          
+          
+}
+int angleArr[10] = {315,260,280,345,0,90,180,200,275,320};
+bool usStatus = 0;
+long long lastTime;
+bool nextDir = 0; 
+short tsopM = 0;
+short lastDir;
+int gateAngle = 0;
+short usZeroStatus = -1;
+void loop() {
+     
+          Tech.getBluetooth();
+          Tech.gyro() ;
+          Tech.IRlego();
+          Tech.Distance();
+           if(usStatus == 1)
+          {
+                        Tech.stopMotor();
+                        
+                        while(abs(Tech.UP((int)gateAngle)) > 2.0)
+                        {
+                            //delay(100);Serial.println("Skos");
+                            Tech.gyro();
+                         if((int)gateAngle>0) 
+                         {                              
+                              Tech.motor('A', -220);
+                              Tech.motor('B', 220);
+                              Tech.motor('C', -Tech.UP((int)gateAngle) * 20);
+                         }
+                          else
+                          {
+                            
+                              Tech.motor('A', -Tech.UP((int)gateAngle) * 20);
+                              Tech.motor('B', -220);
+                              Tech.motor('C', 220);
+                         
+                          }
+                        }
+                        long long skosTime =  millis();
+                        while(millis() - skosTime < 5000)
+                        {
+                                Tech.Distance();
+                                //delay(100);Serial.println("Skos");
+                                //Serial.write("US!:");
+                                //Serial.write((int)gateAngle);
+                                Tech.gyro();
+                                Tech.IRlego();
+                                Tech.move(90, 255 - map(Tech.Str,currentStr-30,currentStr,0,60), 5*Tech.UP((int)gateAngle));
+                                if(Pun.ballTest())
+                                { 
+                                    Pun.stepUp();
+                                    Pun.Hpunch();
+                                    
+                                }
+                        }
+                        usStatus = 0;
+                  }
+          else
+          {
+          if((Pun.ballTest()|| (Tech.Dir == 5 && Tech.Str >= currentStr)) && abs(Tech.angleGate(sectorLen)) < 5.0)
+          {
+              Pun.stepUp();
+              Pun.Hpunch();
+              
+          }
+          else if((Pun.ballTest()|| (Tech.Dir == 5 && Tech.Str >= currentStr)) && abs(Tech.angleGate(sectorLen)) > 2.0 && Tech.usTrue())
+          {
+              gateAngle = Tech.angleGate(sectorLen);
+              usStatus = 1;         
+          }
+          
+              
+               //short currDir = Tech.Dir;
+               long long int cd = millis();
+                  if(Tech.Dir == 5)
+                      Tech.move(angleArr[Tech.Dir], 255 - map(Tech.Str,currentStr-60,currentStr,0,80), Mreg.UI(Tech.UP(0)));
+                  
+                  else if(Tech.Dir == 6 || Tech.Dir == 4)
+                      Tech.move(angleArr[Tech.Dir], 255 - map(Tech.Str,currentStr-30,currentStr,0,80), Mreg.UI(Tech.UP(0)));
+                  else
+                      Tech.move(angleArr[Tech.Dir], 255, Mreg.UI(Tech.UP(0)));          
+               
+          }
+          
+}
