@@ -1,5 +1,5 @@
 #define pwmA 11//133 78
-#define digital1A 10
+#define digital1A 10//110
 #define digital2A 9
 class colorSensor{
   public:
