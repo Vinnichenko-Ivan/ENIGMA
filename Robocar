@@ -1,0 +1,38 @@
+#include "robocar.h"
+colorSensor colorLeft1;
+colorSensor colorLeft2;
+colorSensor colorLeft3;
+colorSensor colorRight1;
+colorSensor colorRight2;
+colorSensor colorRight3;
+void setup() {
+Serial.begin(115200);
+colorRight3.calibrate(A0);
+colorRight2.calibrate(A1);
+colorRight1.calibrate(A2);
+colorLeft1.calibrate(A5);
+colorLeft2.calibrate(A4);
+colorLeft3.calibrate(A3);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+Serial.print(" l3: ");
+Serial.print(colorLeft3.getLight());
+Serial.print(" l2: ");
+Serial.print(colorLeft2.getLight());
+Serial.print(" l1: ");
+Serial.print(colorLeft1.getLight());
+Serial.print(" r1: ");
+Serial.print(colorRight1.getLight());
+Serial.print(" r2: ");
+Serial.print(colorRight2.getLight());
+Serial.print(" r3: ");
+Serial.println(colorRight3.getLight());
+
+
+
+
+
+delay(250);
+}
