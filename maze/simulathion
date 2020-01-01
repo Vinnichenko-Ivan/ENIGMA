@@ -94,7 +94,7 @@ void draw(){
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
-			cout<<fild[xi][yi][4]<<fild[xi][yi][0]<<fild[xi][yi][2];
+			cout<<fild[xi][yi][4]<<"\x1B[0;31;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m"<<fild[xi][yi][2];
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
@@ -118,9 +118,10 @@ void draw(){
 
 int main()
 {
+	cout<<"\x1B[0;0;40m";
 	srand( time(0) );
 	generate();
 	draw();
-	cout<<rand()%2;
+	cout<<rand()%2<<"\x1B[0;31;40m";
     return 0;
 }
