@@ -1,0 +1,126 @@
+#include <iostream>
+#include <random>
+#include <ctime>
+using namespace std;
+#define x 5
+#define y 5
+int buff;
+int fild [x][y][6]={0};
+void generate(){
+	for(int xi=0;xi<x;xi++){
+		for(int yi=0;yi<y;yi++){
+			buff=rand()%2;
+			fild[xi][yi][rand()%4+1]=1;
+		}
+	}
+	// 		buff=rand()%2;
+	// 		//cout<<buff;
+	// 		if(buff){
+	// 			fild[xi][yi][1]=1;
+	// 			if(yi>0){
+	// 				fild[xi][yi-1][1]=1;
+	// 			}
+	// 		}	
+	// 		buff=rand()%2;
+	// 		if(buff){
+	// 			fild[xi][yi][2]=1;
+	// 			if(xi-1<x){
+	// 				fild[xi+1][yi][2]=1;
+	// 			}
+	// 		}
+	// 		buff=rand()%2;
+	// 		if(buff){
+	// 			fild[xi][yi][3]=1;
+	// 			if(yi-1<y){
+	// 				fild[xi][yi+1][3]=1;
+	// 			}
+	// 		}	
+	// 		buff=rand()%2;
+	// 		if(buff){
+	// 			fild[xi][yi][4]=1;
+	// 			if(xi>0){
+	// 				fild[xi-1][yi][4]=1;
+	// 			}
+	// 		}
+	// 	}
+	// }
+	 for(int xi=0;xi<x;xi++){
+	 	for(int yi=0;yi<y;yi++){
+			for(int n=1;n<5;n++){
+				if(n==1&&yi>0){
+					fild[xi][yi-1][3]=fild[xi][yi][1];
+				}
+				if(n==2&&xi<x-1){
+					fild[xi+1][yi][4]=fild[xi][yi][2];
+				}
+				if(n==3&&yi<y-1){
+					fild[xi][yi+1][1]=fild[xi][yi][3];
+				}
+				if(n==4&&xi>0){
+					fild[xi-1][yi][2]=fild[xi][yi][4];
+				}
+			}
+		}		
+	}
+	for(int ix=0;ix<x;ix++){
+		fild[ix][0][1]=1;
+	}
+	for(int ix=0;ix<x;ix++){
+		fild[ix][y-1][3]=1;
+	}
+	for(int yx=0;yx<y;yx++){
+		fild[0][yx][4]=1;
+	}
+	for(int yx=0;yx<y;yx++){
+		fild[x-1][yx][2]=1;
+	}
+}
+void draw(){
+	for(int yi=0;yi<y;yi++){
+		for(int xi=0;xi<x;xi++){
+			if(fild[xi][yi][4]==1){
+				cout<<1;
+			}
+			else{
+				cout<<fild[xi][yi][1];
+			}
+			cout<<fild[xi][yi][1];
+			if(fild[xi][yi][2]==1){
+				cout<<1;
+			}
+			else{
+				cout<<fild[xi][yi][1];
+			}
+		}
+		cout<<endl;
+		for(int xi=0;xi<x;xi++){
+			cout<<fild[xi][yi][4]<<fild[xi][yi][0]<<fild[xi][yi][2];
+		}
+		cout<<endl;
+		for(int xi=0;xi<x;xi++){
+			if(fild[xi][yi][4]==1){
+				cout<<1;
+			}
+			else{
+				cout<<fild[xi][yi][3];
+			}
+			cout<<fild[xi][yi][3];
+			if(fild[xi][yi][2]==1){
+				cout<<1;
+			}
+			else{
+				cout<<fild[xi][yi][3];
+			}
+		}
+		cout<<endl;
+	}
+}
+
+int main()
+{
+	srand( time(0) );
+	generate();
+	draw();
+	cout<<rand()%2;
+    return 0;
+}
