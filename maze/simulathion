@@ -136,21 +136,28 @@ void distanse(){
 
 }
 void  go(){
-	steck+='g';
-	fild[xrobot][yrobot][0]=1;
-	if(robotAngel==1){
-		yrobot-=1;
+	if(fild[xrobot][yrobot][robotAngel]==0){
+		steck+='g';
+
+		fild[xrobot][yrobot][0]=1;
+
+		if(robotAngel==1){
+			yrobot-=1;
+		}
+		if(robotAngel==2){
+			xrobot+=1;
+		}
+		if(robotAngel==3){
+			yrobot+=1;
+		}
+		if(robotAngel==4){
+			xrobot-=1;
+		}
+		fild[xrobot][yrobot][0]=2;
 	}
-	if(robotAngel==2){
-		xrobot+=1;
+	else{
+		steck+='c';
 	}
-	if(robotAngel==3){
-		yrobot+=1;
-	}
-	if(robotAngel==4){
-		xrobot-=1;
-	}
-	fild[xrobot][yrobot][0]=2;
 }
 void left (){
 	steck+='l';
@@ -189,6 +196,6 @@ int main()
 	right();
 	go();
 	draw();
-	cout<<rand()%2<<"\x1B[0;31;40m";
+	cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<steck<<endl;
     return 0;
 }
