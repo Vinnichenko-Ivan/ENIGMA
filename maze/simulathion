@@ -2,6 +2,8 @@
 #include <random>
 #include <ctime>
 #include <string>
+#include <time.h> 
+#include <unistd.h>
 using namespace std;
 #define x 10
 #define y 10
@@ -158,6 +160,8 @@ void  go(){
 	else{
 		steck+='c';
 	}
+	usleep(250000);
+	draw();
 }
 void left (){
 	steck+='l';
@@ -178,6 +182,8 @@ void robot(){
 }
 void test(){
 	fild[yrobot][xrobot][0]=2;
+	usleep(1000000);
+	draw();
 }
 int main()
 {
