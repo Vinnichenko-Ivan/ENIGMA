@@ -1,12 +1,17 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <string>
 using namespace std;
-#define x 5
-#define y 5
+#define x 10
+#define y 10
+string steck="";
+int leftD,rightD,straightD,backD;
 int buff;
+int xrobot=5,yrobot=5,robotAngel=1;
 int fild [x][y][6]={0};
 void generate(){
+
 	for(int xi=0;xi<x;xi++){
 		for(int yi=0;yi<y;yi++){
 			buff=rand()%2;
@@ -76,6 +81,7 @@ void generate(){
 	}
 }
 void draw(){
+	system("clear");	
 	for(int yi=0;yi<y;yi++){
 		for(int xi=0;xi<x;xi++){
 			if(fild[xi][yi][4]==1){
@@ -94,7 +100,17 @@ void draw(){
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
-			cout<<fild[xi][yi][4]<<"\x1B[0;31;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m"<<fild[xi][yi][2];
+			cout<<fild[xi][yi][4];
+			if(fild[xi][yi][0]==0){
+				cout<<"\x1B[0;31;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m";
+			}
+			else if(fild[xi][yi][0]==1){
+				cout<<"\x1B[0;33;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m";
+			}
+			else{
+				cout<<"\x1B[1;32;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m";
+			}
+			cout<<fild[xi][yi][2];
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
@@ -115,12 +131,63 @@ void draw(){
 		cout<<endl;
 	}
 }
+void distanse(){
 
+
+}
+void  go(){
+	steck+='g';
+	fild[xrobot][yrobot][0]=1;
+	if(robotAngel==1){
+		yrobot-=1;
+	}
+	if(robotAngel==2){
+		xrobot+=1;
+	}
+	if(robotAngel==3){
+		yrobot+=1;
+	}
+	if(robotAngel==4){
+		xrobot-=1;
+	}
+	fild[xrobot][yrobot][0]=2;
+}
+void left (){
+	steck+='l';
+	robotAngel--;
+	if(robotAngel==0){
+		robotAngel=4;
+	}
+}
+void right(){
+	steck+='r';
+	robotAngel++;
+	if(robotAngel==5){
+		robotAngel=1;
+	}
+}
+void robot(){
+	//distance();
+}
+void test(){
+	fild[yrobot][xrobot][0]=2;
+}
 int main()
 {
+
 	cout<<"\x1B[0;0;40m";
 	srand( time(0) );
 	generate();
+	//fild[3][3][0]=1;
+	draw();
+	test();
+	//draw();
+	go();
+	go();
+	left();
+	go();
+	right();
+	go();
 	draw();
 	cout<<rand()%2<<"\x1B[0;31;40m";
     return 0;
