@@ -5,52 +5,20 @@
 #include <time.h> 
 #include <unistd.h>
 using namespace std;
-#define x 10
-#define y 10
+#define x 25
+#define y 15
 string steck="";
 int leftD,rightD,straightD,backD;
 int buff;
 int xrobot=5,yrobot=5,robotAngel=1;
 int fild [x][y][6]={0};
 void generate(){
-
 	for(int xi=0;xi<x;xi++){
 		for(int yi=0;yi<y;yi++){
 			buff=rand()%2;
 			fild[xi][yi][rand()%4+1]=1;
 		}
 	}
-	// 		buff=rand()%2;
-	// 		//cout<<buff;
-	// 		if(buff){
-	// 			fild[xi][yi][1]=1;
-	// 			if(yi>0){
-	// 				fild[xi][yi-1][1]=1;
-	// 			}
-	// 		}	
-	// 		buff=rand()%2;
-	// 		if(buff){
-	// 			fild[xi][yi][2]=1;
-	// 			if(xi-1<x){
-	// 				fild[xi+1][yi][2]=1;
-	// 			}
-	// 		}
-	// 		buff=rand()%2;
-	// 		if(buff){
-	// 			fild[xi][yi][3]=1;
-	// 			if(yi-1<y){
-	// 				fild[xi][yi+1][3]=1;
-	// 			}
-	// 		}	
-	// 		buff=rand()%2;
-	// 		if(buff){
-	// 			fild[xi][yi][4]=1;
-	// 			if(xi>0){
-	// 				fild[xi-1][yi][4]=1;
-	// 			}
-	// 		}
-	// 	}
-	// }
 	 for(int xi=0;xi<x;xi++){
 	 	for(int yi=0;yi<y;yi++){
 			for(int n=1;n<5;n++){
@@ -170,21 +138,36 @@ void draw(){
 				}
 			}
 		}
+		if(yi==0){
+			cout<<"straightD: "<<straightD;	
+		}
+		if(yi==1){
+			cout<<"rightD: "<<rightD;	
+		}
+		if(yi==2){
+			cout<<"leftD: "<<leftD;	
+		}
+		if(yi==3){
+			cout<<"backD: "<<backD;	
+		}
+		if(yi==4){
+			cout<<"angel: ";
+			if(robotAngel==1){
+				cout<<"↑";
+			}
+			if(robotAngel==2){
+				cout<<"→";
+			}
+			if(robotAngel==3){
+				cout<<"↓";
+			}
+			if(robotAngel==4){
+				cout<<"←";
+			}	
+		}
 		cout<<endl;
 	}
-	cout<<endl<<endl<<"straightD: "<<straightD<<endl<<"rightD: "<<rightD<<endl<<"leftD: "<<leftD<<endl<<"backD: "<<backD<<endl<<"angel: ";
-	if(robotAngel==1){
-		cout<<"↑"<<endl;
-	}
-	if(robotAngel==2){
-		cout<<"→"<<endl;
-	}
-	if(robotAngel==3){
-		cout<<"↓"<<endl;
-	}
-	if(robotAngel==4){
-		cout<<"←"<<endl;
-	}
+	//cout<<endl<<endl<<"straightD: "<<straightD<<endl<<"rightD: "<<rightD<<endl<<"leftD: "<<leftD<<endl<<"backD: "<<backD<<endl<<"angel: ";
 }
 void distanse(){
 	straightD=fild[xrobot][yrobot][robotAngel];
@@ -259,10 +242,12 @@ int main()
 {
 	cout<<"\x1B[0;0;40m";
 	srand( time(0) );
+	xrobot=rand()%x;
+	yrobot=rand()%y;
 	generate();
-	test();
+	//test();
 	draw();
-	for(int i=0;i<100;i++){
+	for(int i=0;i<190;i++){
 		distanse();
 		buff=rand()%100;
 		if(buff<34){
