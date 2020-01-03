@@ -172,7 +172,19 @@ void draw(){
 		}
 		cout<<endl;
 	}
-	cout<<endl<<endl<<"straightD "<<straightD<<endl<<"rightD "<<rightD<<endl<<"leftD "<<leftD<<endl<<"backD "<<backD<<endl;
+	cout<<endl<<endl<<"straightD: "<<straightD<<endl<<"rightD: "<<rightD<<endl<<"leftD: "<<leftD<<endl<<"backD: "<<backD<<endl<<"angel: ";
+	if(robotAngel==1){
+		cout<<"↑"<<endl;
+	}
+	if(robotAngel==2){
+		cout<<"→"<<endl;
+	}
+	if(robotAngel==3){
+		cout<<"↓"<<endl;
+	}
+	if(robotAngel==4){
+		cout<<"←"<<endl;
+	}
 }
 void distanse(){
 	straightD=fild[xrobot][yrobot][robotAngel];
@@ -250,7 +262,7 @@ int main()
 	generate();
 	test();
 	draw();
-	for(int i=0;i<200;i++){
+	for(int i=0;i<20;i++){
 		distanse();
 		buff=rand()%100;
 		if(buff<34){
