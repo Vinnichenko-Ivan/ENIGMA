@@ -87,22 +87,42 @@ void draw(){
 	for(int yi=0;yi<y;yi++){
 		for(int xi=0;xi<x;xi++){
 			if(fild[xi][yi][4]==1){
-				cout<<1;
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
 			}
 			else{
-				cout<<fild[xi][yi][1];
+				if(fild[xi][yi][1]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][1];
+				}
 			}
-			cout<<fild[xi][yi][1];
+			if(fild[xi][yi][1]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][1];
+				}
 			if(fild[xi][yi][2]==1){
-				cout<<1;
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
 			}
 			else{
-				cout<<fild[xi][yi][1];
+				if(fild[xi][yi][1]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][1];
+				}
 			}
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
-			cout<<fild[xi][yi][4];
+			if(fild[xi][yi][4]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][4];
+				}
 			if(fild[xi][yi][0]==0){
 				cout<<"\x1B[0;31;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m";
 			}
@@ -112,22 +132,42 @@ void draw(){
 			else{
 				cout<<"\x1B[1;32;40m"<<fild[xi][yi][0]<<"\x1B[0;0;40m";
 			}
-			cout<<fild[xi][yi][2];
+			if(fild[xi][yi][2]){
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+			}
+			else{
+				cout<<fild[xi][yi][2];
+			}
 		}
 		cout<<endl;
 		for(int xi=0;xi<x;xi++){
 			if(fild[xi][yi][4]==1){
-				cout<<1;
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+			}
+			else{
+				if(fild[xi][yi][3]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][3];
+				}
+			}
+			if(fild[xi][yi][3]){
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
 			}
 			else{
 				cout<<fild[xi][yi][3];
 			}
-			cout<<fild[xi][yi][3];
 			if(fild[xi][yi][2]==1){
-				cout<<1;
+				cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
 			}
 			else{
-				cout<<fild[xi][yi][3];
+				if(fild[xi][yi][3]){
+					cout<<"\x1B[0;34;40m"<<1<<"\x1B[0;0;40m";
+				}
+				else{
+					cout<<fild[xi][yi][3];
+				}
 			}
 		}
 		cout<<endl;
@@ -210,7 +250,7 @@ int main()
 	generate();
 	test();
 	draw();
-	for(int i=0;i<100;i++){
+	for(int i=0;i<200;i++){
 		distanse();
 		buff=rand()%100;
 		if(buff<34){
