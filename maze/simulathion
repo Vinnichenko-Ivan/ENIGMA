@@ -146,7 +146,7 @@ void distanse(){
 		rightD=fild[xrobot][yrobot][1];
 	}
 	else{
-		leftD=fild[xrobot][yrobot][robotAngel+1];
+		rightD=fild[xrobot][yrobot][robotAngel+1];
 	}
 	if(robotAngel==1||robotAngel==2){
 		backD=fild[xrobot][yrobot][robotAngel+2];
@@ -205,39 +205,64 @@ void test(){
 }
 int main()
 {
-
 	cout<<"\x1B[0;0;40m";
 	srand( time(0) );
 	generate();
-	//fild[3][3][0]=1;
-	draw();
 	test();
-	//draw();
-	while(1){
+	draw();
+	for(int i=0;i<100;i++){
 		distanse();
-		if(straightD){
-			buff=rand()%100;
-			if(buff<50)
-				right();
-			else
+		buff=rand()%100;
+		if(buff<34){
+			if(straightD==0){
+				go();
+			}
+			else if(leftD==0){
 				left();
+				go();
+			}	
+			else if(rightD==0){
+				right();
+				go();
+			}
+			else{
+				right();
+			}
 		}
-		else{
-			go();
+		else if(buff>66){
+			if(leftD==0){
+				left();
+				go();
+			}	
+			else if(rightD==0){
+				right();
+				go();
+			}
+			else if(straightD==0){
+				go();
+			}
+			else{
+				right();
+			}
 		}
-		cin>>buff;
+		else{	
+			if(rightD==0){
+				right();
+				go();
+			}
+			else if(straightD==0){
+				go();
+			}
+			else if(leftD==0){
+				left();
+				go();
+			}
+			else{
+				right();
+			}		
+		}
 		draw();
 	}
-	// go();
-	// distanse();
-	// distanse();
-	// go();
-	// left();
-	// distanse();
-	// draw();
-	// go();
-	// right();
-	// go();
 	draw();
 	cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<steck<<endl;
     return 0;
