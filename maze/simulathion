@@ -4,6 +4,7 @@
 #include <string>
 #include <time.h> 
 #include <unistd.h>
+#include <vector>
 using namespace std;
 #define x 25
 #define y 15
@@ -12,6 +13,27 @@ int leftD,rightD,straightD,backD;
 int buff;
 int xrobot=5,yrobot=5,robotAngel=1;
 int fild [x][y][6]={0};
+vector<int> memoryX(1,0);
+vector<int> memoryY(1,0);
+int myCordX=0,myCordY=0;
+int myNewCordX=0,myNewCordY=0;
+int counterMem=0;
+bool lefting,righting,straighting;
+bool memorySearch(int xC,int yC){
+	for(int i=0;i<counterMem;i++)
+	{
+		if(memoryX[i]==xC&&memoryY[i]==yC){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void memory(int xC,int yC){
+	counterMem++;
+	memoryX.push_back(xC);
+	memoryY.push_back(yC);
+}
 void generate(){
 	for(int xi=0;xi<x;xi++){
 		for(int yi=0;yi<y;yi++){
@@ -167,7 +189,32 @@ void draw(){
 		}
 		cout<<endl;
 	}
-	//cout<<endl<<endl<<"straightD: "<<straightD<<endl<<"rightD: "<<rightD<<endl<<"leftD: "<<leftD<<endl<<"backD: "<<backD<<endl<<"angel: ";
+		}
+void left (){
+	steck+='l';
+	robotAngel--;
+	if(robotAngel==0){
+		robotAngel=4;
+	}
+}
+void right(){
+	steck+='r';
+	robotAngel++;
+	if(robotAngel==5){
+		robotAngel=1;
+	}
+}
+void leftP (){
+	robotAngel--;
+	if(robotAngel==0){
+		robotAngel=4;
+	}
+}
+void rightP(){
+	robotAngel++;
+	if(robotAngel==5){
+		robotAngel=1;
+	}
 }
 void distanse(){
 	straightD=fild[xrobot][yrobot][robotAngel];
@@ -190,6 +237,36 @@ void distanse(){
 		backD=fild[xrobot][yrobot][robotAngel-2];	
 	}
 }
+void NewCord(int angel){
+	if(angel==1){
+		rightP();
+	}
+	if(angel==-1){
+		leftP();
+	}
+	if(robotAngel==1){
+		myNewCordY=myCordY-1;
+		myNewCordX=myCordX;
+		}
+	if(robotAngel==2){
+		myNewCordX=myCordX+1;
+		myNewCordY=myCordY;
+	}
+	if(robotAngel==3){
+		myNewCordY=myCordY+1;
+		myNewCordX=myCordX;
+	}
+	if(robotAngel==4){
+		myNewCordX=myCordX-1;
+		myNewCordY=myCordY;
+	}
+	if(angel==1){
+		leftP();
+	}
+	if(angel==-1){
+		rightP();
+	}
+}
 void  go(){
 	if(fild[xrobot][yrobot][robotAngel]==0){
 		steck+='g';
@@ -198,40 +275,94 @@ void  go(){
 
 		if(robotAngel==1){
 			yrobot-=1;
+			myCordY-=1;
+			cout<<"AAAAAAAAAAAAA";
 		}
 		if(robotAngel==2){
 			xrobot+=1;
+			myCordX+=1;
 		}
 		if(robotAngel==3){
 			yrobot+=1;
+			myCordY+=1;
 		}
 		if(robotAngel==4){
 			xrobot-=1;
+			myCordX-=1;
 		}
 		fild[xrobot][yrobot][0]=2;
 	}
 	else{
 		steck+='c';
 	}
+	memory(myCordX,myCordY);
 	usleep(250000);
 	draw();
 }
-void left (){
-	steck+='l';
-	robotAngel--;
-	if(robotAngel==0){
-		robotAngel=4;
-	}
+void sensControll(){
+		char a;
+		cin>>a;
+		if(a=='g'){
+			go();
+		}
+		if(a=='l'){
+			left();
+			draw();
+		}
+		if(a=='r'){
+			right();
+			draw();
+		}
+		cout<<endl;
+		cout<<"myCord "<<myCordX<<" : "<<myCordY<<endl;
+		NewCord(0);
+		cout<<"cordStr "<<myNewCordX<<" : "<<myNewCordY;
 }
-void right(){
-	steck+='r';
-	robotAngel++;
-	if(robotAngel==5){
-		robotAngel=1;
+void algorithm(){
+	distanse();
+	memoryX[0]=0;
+	memoryY[0]=0;
+	counterMem=1;
+	for(int i =0 ;i<190;i++){
+
+		lefting=0;
+		righting=0;
+		straighting=0;
+		//draw();
+		distanse();
+		NewCord(-1);
+		lefting=memorySearch(myNewCordX,myNewCordY);
+		NewCord(0);
+		straighting=memorySearch(myNewCordX,myNewCordY);
+		NewCord(1);
+		righting=memorySearch(myNewCordX,myNewCordY);
+		if(leftD==0&&lefting==0){
+			left();
+			go();
+		}	
+		else if(rightD==0&&righting==0){
+			right();
+			go();
+		}
+		else if(straightD==0&&straighting==0){
+			go();
+		}
+		else if(leftD==0&&lefting){
+			left();
+			go();
+		}	
+		else if(rightD==0&&righting){
+			right();
+			go();
+		}
+		else if(straightD==0&&straighting){
+			go();
+		}
+		else{
+			right();
+		}
 	}
-}
-void robot(){
-	//distance();
+	draw();
 }
 void test(){
 	fild[yrobot][xrobot][0]=2;
@@ -247,59 +378,7 @@ int main()
 	generate();
 	//test();
 	draw();
-	for(int i=0;i<190;i++){
-		distanse();
-		buff=rand()%100;
-		if(buff<34){
-			if(straightD==0){
-				go();
-			}
-			else if(leftD==0){
-				left();
-				go();
-			}	
-			else if(rightD==0){
-				right();
-				go();
-			}
-			else{
-				right();
-			}
-		}
-		else if(buff>66){
-			if(leftD==0){
-				left();
-				go();
-			}	
-			else if(rightD==0){
-				right();
-				go();
-			}
-			else if(straightD==0){
-				go();
-			}
-			else{
-				right();
-			}
-		}
-		else{	
-			if(rightD==0){
-				right();
-				go();
-			}
-			else if(straightD==0){
-				go();
-			}
-			else if(leftD==0){
-				left();
-				go();
-			}
-			else{
-				right();
-			}		
-		}
-		draw();
-	}
+	algorithm();
 	draw();
 	cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<steck<<endl;
     return 0;
