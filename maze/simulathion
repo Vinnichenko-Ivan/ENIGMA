@@ -8,7 +8,7 @@
 using namespace std;
 #define x 10
 #define y 10
-string steck="";
+string steck="",steck1="";
 int leftD,rightD,straightD,backD;
 int buff;
 int xrobot=5,yrobot=5,robotAngel=1;
@@ -374,7 +374,7 @@ void algorithm(){
 	memoryX[0]=0;
 	memoryY[0]=0;
 	counterMem=1;
-	for(int i =0 ;i<190;i++){
+	for(int i =0 ;i<500;i++){
 		lefting=0;
 		righting=0;
 		straighting=0;
@@ -387,11 +387,11 @@ void algorithm(){
 		NewCord(1);
 		righting=memorySearch(myNewCordX,myNewCordY);
 		cout<<endl<<"radar"<<lefting<<" "<<straighting<<" "<<righting<<" "<<endl;
-		if(leftD==0&&lefting==0&&rightD==0&&straightD==0&&straighting==0||righting==0&&straightD==0&&straighting==0){
+		if(straightD==0&&straighting==0){
 			go();
 		}
 		else if(leftD==0&&lefting==0&&rightD==0&&righting==0){
-			buff=rand()/%100+1;
+			buff=rand()%100+1;
 			if(buff>50){
 				left();
 				go();
@@ -412,16 +412,50 @@ void algorithm(){
 		else if(straightD==0&&straighting==0){
 			go();
 		}
-		else if(leftD==0&&lefting<righting&&lefting<straighting){
+		else{
+			steck1=steck;
 			left();
-			go();
-		}	
-		else if(rightD==0&&righting<lefting&&righting<straighting){
-			right();
-			go();
-		}
-		else if(straightD==0&&straighting<lefting&&straighting<righting){
-			go();
+			left();
+			steck.pop_back();
+			steck.pop_back();
+			bool flag=1;
+			while(flag){
+				if(steck.length()==0){
+					flag=0;
+				}
+				else if(steck[steck.length()-1]=='g'){
+					go();
+					steck.pop_back();
+				}
+				else if(steck[steck.length()-1]=='r'){
+					left();
+					steck.pop_back();
+				}
+				else if(steck[steck.length()-1]=='l'){
+					right();
+					steck.pop_back();
+				}
+				distanse();
+				lefting=0;
+				righting=0;
+				straighting=0;
+				steck.pop_back();
+				steck1.pop_back();
+				NewCord(-1);
+				lefting=memorySearch(myNewCordX,myNewCordY);
+				NewCord(0);
+				straighting=memorySearch(myNewCordX,myNewCordY);
+				NewCord(1);
+				righting=memorySearch(myNewCordX,myNewCordY);
+				if(leftD==0&&lefting==0||rightD==0&&righting==0||straightD==0&&straighting==0){
+				flag=0;
+				right();
+				right();
+				steck.pop_back();
+				steck.pop_back();
+				steck=steck1;
+				}
+			}
 		}
 		// else if(leftD==0){
 		// 	left();
@@ -434,9 +468,12 @@ void algorithm(){
 		// else if(straightD==0){
 		// 	go();
 		// }
-		else{
-			randomeGo();
-		}
+		// else{
+		// 	randomeGo();
+		
+		// }
+		cout<<endl;
+		cout<<"myCord "<<myCordX<<" : "<<myCordY<<endl;
 	}
 	draw();
 }
@@ -453,9 +490,7 @@ int main()
 	yrobot=rand()%y;
 	generate();
 	//test();
-	draw();
 	algorithm();
-	draw();
 	cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<steck<<endl;
     return 0;
 }
