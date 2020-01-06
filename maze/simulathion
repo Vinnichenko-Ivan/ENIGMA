@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include <vector>
 using namespace std;
-#define x 25
-#define y 15
+#define x 10
+#define y 10
 string steck="";
 int leftD,rightD,straightD,backD;
 int buff;
@@ -18,15 +18,16 @@ vector<int> memoryY(1,0);
 int myCordX=0,myCordY=0;
 int myNewCordX=0,myNewCordY=0;
 int counterMem=0;
-bool lefting,righting,straighting;
-bool memorySearch(int xC,int yC){
+int lefting,righting,straighting;
+int memorySearch(int xC,int yC){
+	int count=0;
 	for(int i=0;i<counterMem;i++)
 	{
 		if(memoryX[i]==xC&&memoryY[i]==yC){
-			return 1;
+			count++;
 		}
 	}
-	return 0;
+	return count;
 }
 
 void memory(int xC,int yC){
@@ -276,7 +277,6 @@ void  go(){
 		if(robotAngel==1){
 			yrobot-=1;
 			myCordY-=1;
-			cout<<"AAAAAAAAAAAAA";
 		}
 		if(robotAngel==2){
 			xrobot+=1;
@@ -318,13 +318,63 @@ void sensControll(){
 		NewCord(0);
 		cout<<"cordStr "<<myNewCordX<<" : "<<myNewCordY;
 }
+void randomeGo(){
+	buff=rand()%100;
+	if(buff<34){
+		if(straightD==0){
+			go();
+		}
+		else if(leftD==0){
+			left();
+			go();
+		}	
+		else if(rightD==0){
+			right();
+			go();
+		}
+		else{
+			right();
+		}
+	}
+	else if(buff>66){
+		if(leftD==0){
+			left();
+			go();
+		}	
+		else if(rightD==0){
+			right();
+			go();
+		}
+		else if(straightD==0){
+			go();
+		}
+		else{
+			right();
+		}
+	}
+	else{	
+		if(rightD==0){
+			right();
+			go();
+		}
+		else if(straightD==0){
+			go();
+		}
+		else if(leftD==0){
+			left();
+			go();
+		}
+		else{
+			right();
+		}		
+	}
+}
 void algorithm(){
 	distanse();
 	memoryX[0]=0;
 	memoryY[0]=0;
 	counterMem=1;
 	for(int i =0 ;i<190;i++){
-
 		lefting=0;
 		righting=0;
 		straighting=0;
@@ -336,6 +386,7 @@ void algorithm(){
 		straighting=memorySearch(myNewCordX,myNewCordY);
 		NewCord(1);
 		righting=memorySearch(myNewCordX,myNewCordY);
+		cout<<endl<<"radar"<<lefting<<" "<<straighting<<" "<<righting<<" "<<endl;
 		if(leftD==0&&lefting==0){
 			left();
 			go();
@@ -347,19 +398,30 @@ void algorithm(){
 		else if(straightD==0&&straighting==0){
 			go();
 		}
-		else if(leftD==0&&lefting){
+		else if(leftD==0&&lefting<righting&&lefting<straighting){
 			left();
 			go();
 		}	
-		else if(rightD==0&&righting){
+		else if(rightD==0&&righting<lefting&&righting<straighting){
 			right();
 			go();
 		}
-		else if(straightD==0&&straighting){
+		else if(straightD==0&&straighting<lefting&&straighting<righting){
 			go();
 		}
+		// else if(leftD==0){
+		// 	left();
+		// 	go();
+		// }	
+		// else if(rightD==0){
+		// 	right();
+		// 	go();
+		// }
+		// else if(straightD==0){
+		// 	go();
+		// }
 		else{
-			right();
+			randomeGo();
 		}
 	}
 	draw();
