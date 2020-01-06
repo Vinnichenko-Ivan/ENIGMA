@@ -387,7 +387,21 @@ void algorithm(){
 		NewCord(1);
 		righting=memorySearch(myNewCordX,myNewCordY);
 		cout<<endl<<"radar"<<lefting<<" "<<straighting<<" "<<righting<<" "<<endl;
-		if(leftD==0&&lefting==0){
+		if(leftD==0&&lefting==0&&rightD==0&&straightD==0&&straighting==0||righting==0&&straightD==0&&straighting==0){
+			go();
+		}
+		else if(leftD==0&&lefting==0&&rightD==0&&righting==0){
+			buff=rand()/%100+1;
+			if(buff>50){
+				left();
+				go();
+			}
+			else{
+				right();
+				go();
+			}
+		}
+		else if(leftD==0&&lefting==0){
 			left();
 			go();
 		}	
