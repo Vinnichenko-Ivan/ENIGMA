@@ -448,12 +448,12 @@ void algorithm(){
 				NewCord(1);
 				righting=memorySearch(myNewCordX,myNewCordY);
 				if(leftD==0&&lefting==0||rightD==0&&righting==0||straightD==0&&straighting==0){
-				flag=0;
-				right();
-				right();
-				steck.pop_back();
-				steck.pop_back();
-				steck=steck1;
+					flag=0;
+					right();
+					right();
+					steck.pop_back();
+					steck.pop_back();
+					steck=steck1;
 				}
 			}
 		}
