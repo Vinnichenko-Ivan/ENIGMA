@@ -5,21 +5,24 @@
 #include <time.h> 
 #include <unistd.h>
 #include <vector>
+
 using namespace std;
-#define x 10
-#define y 10
-string steck="",steck1="";
-int leftD,rightD,straightD,backD;
+unsigned const int x = 10 ;
+unsigned const int y = 10 ;
+//---------------------------------------------------------------------------------------------//
+string algorithmLogfile="",algorithmHelpingLogfile="",generalLogfile="";
+int leftWall,rightWall,forwardWall,backWall;
 int buff;
-int xrobot=5,yrobot=5,robotAngel=1;
+int xrobot=5,yrobot=5,robotTurnPosition=1;
 int fild [x][y][6]={0};
 vector<int> memoryX(1,0);
 vector<int> memoryY(1,0);
 int myCordX=0,myCordY=0;
-int myNewCordX=0,myNewCordY=0;
+int simulatedCordX=0,simulatedCordY=0;
 int counterMem=0;
-int lefting,righting,straighting;
-int memorySearch(int xC,int yC){
+int checkLeftPosition,checkRightPosition,checkForwardPosition;
+//---------------------------------------------------------------------------------------------//
+int memorySearchElement(int xC,int yC){
 	int count=0;
 	for(int i=0;i<counterMem;i++)
 	{
@@ -30,11 +33,12 @@ int memorySearch(int xC,int yC){
 	return count;
 }
 
-void memory(int xC,int yC){
+void memoryAddCordinate(int xC,int yC){
 	counterMem++;
 	memoryX.push_back(xC);
 	memoryY.push_back(yC);
 }
+
 void generate(){
 	for(int xi=0;xi<x;xi++){
 		for(int yi=0;yi<y;yi++){
@@ -73,6 +77,7 @@ void generate(){
 		fild[x-1][yx][2]=1;
 	}
 }
+
 void draw(){
 	system("clear");	
 	for(int yi=0;yi<y;yi++){
@@ -162,311 +167,312 @@ void draw(){
 			}
 		}
 		if(yi==0){
-			cout<<"straightD: "<<straightD;	
+			cout<<"forwardWall: "<<forwardWall;	
 		}
 		if(yi==1){
-			cout<<"rightD: "<<rightD;	
+			cout<<"rightWall: "<<rightWall;	
 		}
 		if(yi==2){
-			cout<<"leftD: "<<leftD;	
+			cout<<"leftWall: "<<leftWall;	
 		}
 		if(yi==3){
-			cout<<"backD: "<<backD;	
+			cout<<"backWall: "<<backWall;	
 		}
 		if(yi==4){
 			cout<<"angel: ";
-			if(robotAngel==1){
+			if(robotTurnPosition==1){
 				cout<<"↑";
 			}
-			if(robotAngel==2){
+			if(robotTurnPosition==2){
 				cout<<"→";
 			}
-			if(robotAngel==3){
+			if(robotTurnPosition==3){
 				cout<<"↓";
 			}
-			if(robotAngel==4){
+			if(robotTurnPosition==4){
 				cout<<"←";
 			}	
 		}
 		cout<<endl;
 	}
 		}
-void left (){
-	steck+='l';
-	robotAngel--;
-	if(robotAngel==0){
-		robotAngel=4;
+void turnLeft(){
+	algorithmLogfile+='l';
+	generalLogfile+="Left ";
+	robotTurnPosition--;
+	if(robotTurnPosition==0){
+		robotTurnPosition=4;
 	}
 }
-void right(){
-	steck+='r';
-	robotAngel++;
-	if(robotAngel==5){
-		robotAngel=1;
+void turnRight(){
+	algorithmLogfile+='r';
+	generalLogfile+="Right ";
+	robotTurnPosition++;
+	if(robotTurnPosition==5){
+		robotTurnPosition=1;
 	}
 }
-void leftP (){
-	robotAngel--;
-	if(robotAngel==0){
-		robotAngel=4;
+void issueTurnLeft(){
+	robotTurnPosition--;
+	if(robotTurnPosition==0){
+		robotTurnPosition=4;
 	}
 }
-void rightP(){
-	robotAngel++;
-	if(robotAngel==5){
-		robotAngel=1;
+void issueTurnRight(){
+	robotTurnPosition++;
+	if(robotTurnPosition==5){
+		robotTurnPosition=1;
 	}
 }
-void distanse(){
-	straightD=fild[xrobot][yrobot][robotAngel];
-	if(robotAngel==1){
-		leftD=fild[xrobot][yrobot][4];
+void searchWallAround(){
+	forwardWall=fild[xrobot][yrobot][robotTurnPosition];
+	if(robotTurnPosition==1){
+		leftWall=fild[xrobot][yrobot][4];
 	}
 	else{
-		leftD=fild[xrobot][yrobot][robotAngel-1];
+		leftWall=fild[xrobot][yrobot][robotTurnPosition-1];
 	}
-	if(robotAngel==4){
-		rightD=fild[xrobot][yrobot][1];
-	}
-	else{
-		rightD=fild[xrobot][yrobot][robotAngel+1];
-	}
-	if(robotAngel==1||robotAngel==2){
-		backD=fild[xrobot][yrobot][robotAngel+2];
+	if(robotTurnPosition==4){
+		rightWall=fild[xrobot][yrobot][1];
 	}
 	else{
-		backD=fild[xrobot][yrobot][robotAngel-2];	
+		rightWall=fild[xrobot][yrobot][robotTurnPosition+1];
+	}
+	if(robotTurnPosition==1||robotTurnPosition==2){
+		backWall=fild[xrobot][yrobot][robotTurnPosition+2];
+	}
+	else{
+		backWall=fild[xrobot][yrobot][robotTurnPosition-2];	
 	}
 }
-void NewCord(int angel){
+void simulatedCord(int angel){
 	if(angel==1){
-		rightP();
+		issueTurnRight();
 	}
 	if(angel==-1){
-		leftP();
+		issueTurnLeft();
 	}
-	if(robotAngel==1){
-		myNewCordY=myCordY-1;
-		myNewCordX=myCordX;
+	if(robotTurnPosition==1){
+		simulatedCordY=myCordY-1;
+		simulatedCordX=myCordX;
 		}
-	if(robotAngel==2){
-		myNewCordX=myCordX+1;
-		myNewCordY=myCordY;
+	if(robotTurnPosition==2){
+		simulatedCordX=myCordX+1;
+		simulatedCordY=myCordY;
 	}
-	if(robotAngel==3){
-		myNewCordY=myCordY+1;
-		myNewCordX=myCordX;
+	if(robotTurnPosition==3){
+		simulatedCordY=myCordY+1;
+		simulatedCordX=myCordX;
 	}
-	if(robotAngel==4){
-		myNewCordX=myCordX-1;
-		myNewCordY=myCordY;
+	if(robotTurnPosition==4){
+		simulatedCordX=myCordX-1;
+		simulatedCordY=myCordY;
 	}
 	if(angel==1){
-		leftP();
+		issueTurnLeft();
 	}
 	if(angel==-1){
-		rightP();
+		issueTurnRight();
 	}
 }
-void  go(){
-	if(fild[xrobot][yrobot][robotAngel]==0){
-		steck+='g';
-
+void  goForward(){
+	if(fild[xrobot][yrobot][robotTurnPosition]==0){
+		algorithmLogfile+='g';
+		generalLogfile+="Forward ";
 		fild[xrobot][yrobot][0]=1;
 
-		if(robotAngel==1){
+		if(robotTurnPosition==1){
 			yrobot-=1;
 			myCordY-=1;
 		}
-		if(robotAngel==2){
+		if(robotTurnPosition==2){
 			xrobot+=1;
 			myCordX+=1;
 		}
-		if(robotAngel==3){
+		if(robotTurnPosition==3){
 			yrobot+=1;
 			myCordY+=1;
 		}
-		if(robotAngel==4){
+		if(robotTurnPosition==4){
 			xrobot-=1;
 			myCordX-=1;
 		}
 		fild[xrobot][yrobot][0]=2;
 	}
 	else{
-		steck+='c';
+		algorithmLogfile+='c';
 	}
-	memory(myCordX,myCordY);
+	memoryAddCordinate(myCordX,myCordY);
 	usleep(250000);
 	draw();
 }
 void sensControll(){
-		char a;
-		cin>>a;
-		if(a=='g'){
-			go();
+		char command;
+		cin>>command;
+		if(command=='g'){
+			goForward();
 		}
-		if(a=='l'){
-			left();
+		if(command=='l'){
+			turnLeft();
 			draw();
 		}
-		if(a=='r'){
-			right();
+		if(command=='r'){
+			turnRight();
 			draw();
 		}
 		cout<<endl;
 		cout<<"myCord "<<myCordX<<" : "<<myCordY<<endl;
-		NewCord(0);
-		cout<<"cordStr "<<myNewCordX<<" : "<<myNewCordY;
+simulatedCord(0);
+		cout<<"cordStr "<<simulatedCordX<<" : "<<simulatedCordY;
 }
 void randomeGo(){
 	buff=rand()%100;
 	if(buff<34){
-		if(straightD==0){
-			go();
+		if(forwardWall==0){
+			goForward();
 		}
-		else if(leftD==0){
-			left();
-			go();
+		else if(leftWall==0){
+			turnLeft();
+			goForward();
 		}	
-		else if(rightD==0){
-			right();
-			go();
+		else if(rightWall==0){
+			turnRight();
+			goForward();
 		}
 		else{
-			right();
+			turnRight();
 		}
 	}
 	else if(buff>66){
-		if(leftD==0){
-			left();
-			go();
+		if(leftWall==0){
+			turnLeft();
+			goForward();
 		}	
-		else if(rightD==0){
-			right();
-			go();
+		else if(rightWall==0){
+			turnRight();
+			goForward();
 		}
-		else if(straightD==0){
-			go();
+		else if(forwardWall==0){
+			goForward();
 		}
 		else{
-			right();
+			turnRight();
 		}
 	}
 	else{	
-		if(rightD==0){
-			right();
-			go();
+		if(rightWall==0){
+			turnRight();
+			goForward();
 		}
-		else if(straightD==0){
-			go();
+		else if(forwardWall==0){
+			goForward();
 		}
-		else if(leftD==0){
-			left();
-			go();
+		else if(leftWall==0){
+			turnLeft();
+			goForward();
 		}
 		else{
-			right();
+			turnRight();
 		}		
 	}
 }
 void algorithm(){
-	distanse();
+	searchWallAround();
 	memoryX[0]=0;
 	memoryY[0]=0;
 	counterMem=1;
-	for(int i =0 ;i<500;i++){
-		lefting=0;
-		righting=0;
-		straighting=0;
-		//draw();
-		distanse();
-		NewCord(-1);
-		lefting=memorySearch(myNewCordX,myNewCordY);
-		NewCord(0);
-		straighting=memorySearch(myNewCordX,myNewCordY);
-		NewCord(1);
-		righting=memorySearch(myNewCordX,myNewCordY);
-		cout<<endl<<"radar"<<lefting<<" "<<straighting<<" "<<righting<<" "<<endl;
-		if(straightD==0&&straighting==0){
-			go();
+	for(int i =0 ;i>-1;i++){
+		checkLeftPosition=0;
+		checkRightPosition=0;
+		checkForwardPosition=0;
+		searchWallAround();
+simulatedCord(-1);
+		checkLeftPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+simulatedCord(0);
+		checkForwardPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+simulatedCord(1);
+		checkRightPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+		cout<<endl<<"radar"<<checkLeftPosition<<" "<<checkForwardPosition<<" "<<checkRightPosition<<" "<<endl;
+		if(forwardWall==0&&checkForwardPosition==0){
+			goForward();
 		}
-		else if(leftD==0&&lefting==0&&rightD==0&&righting==0){
+		else if(leftWall==0&&checkLeftPosition==0&&rightWall==0&&checkRightPosition==0){
 			buff=rand()%100+1;
 			if(buff>50){
-				left();
-				go();
+				turnLeft();
+				goForward();
 			}
 			else{
-				right();
-				go();
+				turnRight();
+				goForward();
 			}
 		}
-		else if(leftD==0&&lefting==0){
-			left();
-			go();
+		else if(leftWall==0&&checkLeftPosition==0){
+			turnLeft();
+			goForward();
 		}	
-		else if(rightD==0&&righting==0){
-			right();
-			go();
+		else if(rightWall==0&&checkRightPosition==0){
+			turnRight();
+			goForward();
 		}
-		else if(straightD==0&&straighting==0){
-			go();
+		else if(forwardWall==0&&checkForwardPosition==0){
+			goForward();
 		}
 		else{
-			steck1=steck;
-			left();
-			left();
-			steck.pop_back();
-			steck.pop_back();
+			algorithmHelpingLogfile=algorithmLogfile;
+			turnLeft();
+			turnLeft();
+			algorithmLogfile.pop_back();
+			algorithmLogfile.pop_back();
 			bool flag=1;
 			while(flag){
-				if(steck.length()==0){
+				if(algorithmLogfile.length()==0){
 					flag=0;
 				}
-				else if(steck[steck.length()-1]=='g'){
-					go();
-					steck.pop_back();
+				else if(algorithmLogfile[algorithmLogfile.length()-1]=='g'){
+					goForward();
+					algorithmLogfile.pop_back();
 				}
-				else if(steck[steck.length()-1]=='r'){
-					left();
-					steck.pop_back();
+				else if(algorithmLogfile[algorithmLogfile.length()-1]=='r'){
+					turnLeft();
+					algorithmLogfile.pop_back();
 				}
-				else if(steck[steck.length()-1]=='l'){
-					right();
-					steck.pop_back();
+				else if(algorithmLogfile[algorithmLogfile.length()-1]=='l'){
+					turnRight();
+					algorithmLogfile.pop_back();
 				}
-				distanse();
-				lefting=0;
-				righting=0;
-				straighting=0;
-				steck.pop_back();
-				steck1.pop_back();
-				NewCord(-1);
-				lefting=memorySearch(myNewCordX,myNewCordY);
-				NewCord(0);
-				straighting=memorySearch(myNewCordX,myNewCordY);
-				NewCord(1);
-				righting=memorySearch(myNewCordX,myNewCordY);
-				if(leftD==0&&lefting==0||rightD==0&&righting==0||straightD==0&&straighting==0){
+				searchWallAround();
+				checkLeftPosition=0;
+				checkRightPosition=0;
+				checkForwardPosition=0;
+				algorithmLogfile.pop_back();
+				algorithmHelpingLogfile.pop_back();
+		simulatedCord(-1);
+				checkLeftPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+		simulatedCord(0);
+				checkForwardPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+		simulatedCord(1);
+				checkRightPosition=memorySearchElement(simulatedCordX,simulatedCordY);
+				if(leftWall==0&&checkLeftPosition==0||rightWall==0&&checkRightPosition==0||forwardWall==0&&checkForwardPosition==0){
 					flag=0;
-					right();
-					right();
-					steck.pop_back();
-					steck.pop_back();
-					steck=steck1;
+					turnRight();
+					turnRight();
+					algorithmLogfile.pop_back();
+					algorithmLogfile.pop_back();
+					algorithmLogfile=algorithmHelpingLogfile;
 				}
 			}
 		}
-		// else if(leftD==0){
-		// 	left();
-		// 	go();
+		// else if(leftWall==0){
+		// 	turnLeft();
+		// 	goForward();
 		// }	
-		// else if(rightD==0){
-		// 	right();
-		// 	go();
+		// else if(rightWall==0){
+		// 	turnRight();
+		// 	goForward();
 		// }
-		// else if(straightD==0){
-		// 	go();
+		// else if(forwardWall==0){
+		// 	goForward();
 		// }
 		// else{
 		// 	randomeGo();
@@ -474,6 +480,7 @@ void algorithm(){
 		// }
 		cout<<endl;
 		cout<<"myCord "<<myCordX<<" : "<<myCordY<<endl;
+//
 	}
 	draw();
 }
@@ -491,6 +498,6 @@ int main()
 	generate();
 	//test();
 	algorithm();
-	cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<steck<<endl;
+	//cout<<rand()%2<<"\x1B[0;2;40m"<<endl<<algorithmLogfile<<endl;
     return 0;
 }
