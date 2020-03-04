@@ -1,3 +1,4 @@
+
 #include<Servo.h>
 #define DEBUG 1
 class dropServo
@@ -67,13 +68,18 @@ class motor
 		int maxPower(int power);
 		int portA,portB,PortC;//c-PWM
 	public:
-		void attache(int a,int b,int c);
+		void attach(int a,int b,int c);
+		void setPower(int power);
 };
-void motor::attache(int a,int b,int c)
+
+void motor::attach(int a,int b,int c)
 {
-	PortA=a;
-	PortB=b;
-	PortC=c;
+	portA=a;
+	portB=b;
+	portC=c;
+	pinMode(portA,OUTPUT);
+	pinMode(portB,OUTPUT);
+	pinMode(portC,OUTPUT);
 }
 
 int motor::maxPower(int power)
@@ -91,23 +97,44 @@ int motor::maxPower(int power)
 		return power;	
 	}
 }
+
+void motor::setPower(int power)
+{
+	power=maxPower(power);
+	if(power>0)
+	{
+		digitalWrite(portA,HIGH);
+		digitalWrite(portB,LOW);
+		analogWrite(portC,abs(power));
+	}
+	else if(power<0)
+	{
+		digitalWrite(portA,LOW);
+		digitalWrite(portB,HIGH);
+		analogWrite(portC,abs(power));
+	}
+	else
+	{
+		digitalWrite(portA,LOW);
+		digitalWrite(portB,LOW);
+		analogWrite(portC,abs(power));
+	}
+}
 //-------------------------------------------------------------------------------------------------------------------//
+
 class moveControll
 {
 	private:
-
+		motor leftMotor;
+		motor rightMotor;
 	public:
 		moveControll();
 };
 
 moveControll::moveControll()
 {
-	pinMode(11,OUTPUT);
-	pinMode(10,OUTPUT);
-	pinMode(9,OUTPUT);
-	pinMode(8,OUTPUT);
-	pinMode(7,OUTPUT);
-	pinMode(6,OUTPUT);
+	leftMotor.attach(9,10,11);
+	rightMotor.attach(8,7,6);
 }
 
 //---------------------------------------------------------------------------------------------------------------------//
