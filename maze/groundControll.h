@@ -45,39 +45,38 @@ void PID::calibrate(float kpc,float kic,float kdc,float imaxc)
 
 double PID::UI(int error)
 { 
-  errorIntegral+=error*(millis()-dt);
-  if(errorIntegral>imax){
-    errorIntegral=imax;
-  }
-  if(errorIntegral<-imax){
-    errorIntegral=-imax;
-  }
-  errorDeviante=(error-errorOld);
-  errorOld=error;
-  dt=millis();
-  return error*kp +errorIntegral*ki+errorDeviante*kd;
+	errorIntegral+=error*(millis()-dt);
+	if(errorIntegral>imax)
+	{
+		errorIntegral=imax;
+	}
+	if(errorIntegral<-imax)
+	{
+		errorIntegral=-imax;
+	}
+	errorDeviante=(error-errorOld);
+	errorOld=error;
+	dt=millis();
+	return error*kp +errorIntegral*ki+errorDeviante*kd;
 }
 //-------------------------------------------------------------------------------------------------------------------//
 
-class moveControll
+class motor
 {
 	private:
 		int maxPower(int power);
+		int portA,portB,PortC;//c-PWM
 	public:
-		moveControll();
+		void attache(int a,int b,int c);
 };
-
-moveControll::moveControll()
+void motor::attache(int a,int b,int c)
 {
-	pinMode(11,OUTPUT);
-	pinMode(10,OUTPUT);
-	pinMode(9,OUTPUT);
-	pinMode(8,OUTPUT);
-	pinMode(7,OUTPUT);
-	pinMode(6,OUTPUT);
+	PortA=a;
+	PortB=b;
+	PortC=c;
 }
 
-int moveControll:maxPower(int power)
+int motor::maxPower(int power)
 {
 	if(power<-255)
 	{
@@ -92,6 +91,25 @@ int moveControll:maxPower(int power)
 		return power;	
 	}
 }
+//-------------------------------------------------------------------------------------------------------------------//
+class moveControll
+{
+	private:
+
+	public:
+		moveControll();
+};
+
+moveControll::moveControll()
+{
+	pinMode(11,OUTPUT);
+	pinMode(10,OUTPUT);
+	pinMode(9,OUTPUT);
+	pinMode(8,OUTPUT);
+	pinMode(7,OUTPUT);
+	pinMode(6,OUTPUT);
+}
+
 //---------------------------------------------------------------------------------------------------------------------//
 
 class US
