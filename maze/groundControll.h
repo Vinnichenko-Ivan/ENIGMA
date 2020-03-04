@@ -122,21 +122,80 @@ void motor::setPower(int power)
 }
 //-------------------------------------------------------------------------------------------------------------------//
 
-class moveControll
+class moveControl
 {
 	private:
 		motor leftMotor;
 		motor rightMotor;
+		char c='';
+		string beta="";
+		int resetIteration=0;
+		int zeroAzimut=0;
+		int targetAzimut=0;
+		int gyroOld=0;
+		int realAzimut=0
+		long timerGyro=0;
+		bool gyroD=0;
+		void azimutControl();
 	public:
-		moveControll();
+		moveControl();
+		bool setZeroAzimut(int azimut);
+
 };
 
-moveControll::moveControll()
+bool moveControl::zeroAzimut(int a){
+	zeroAzimut=a;
+	if(DEBUG){
+		Serial.println("I set zero Azimut");
+	}
+	return 1;
+}
+
+moveControll::moveControl()
 {
 	leftMotor.attach(9,10,11);
 	rightMotor.attach(8,7,6);
 }
 
+void moveControl::gyro(){
+	if(SerialGyro.available()) 
+	{
+		millisGyro=millis();
+		c = (char)SerialGyro.read();
+		beta += c;
+		resetIteration++;
+		if(resetIteration==100)
+		{
+			resetIteration=0;
+			SerialGyro.end();
+			SerialGyro.begin(115200);
+			SerialGyro.print("\n");
+		}
+		if (c == '\n')
+		{
+			SerialGyro.print("\n");
+			SerialGyro.print("\n");
+			realAzimut=beta.toInt();
+			beta="";
+		}
+		if(abs(gyroOld-realAzimut)<3&&millis()-timerGyro>5000)
+		{
+			gyroD=1;
+		}
+		else if(abs(gyroOld-realAzimut)>3)
+		{
+			timerGyro=millis();
+			gyroOld=realAzimut;
+			gyroD=0;
+		}
+	}
+	if(SerialGyro.available()==0&&millis()-millisGyro>500)
+	{
+		SerialGyro.end();
+		SerialGyro.begin(115200);
+		SerialGyro.print("\n");
+	}
+}
 //---------------------------------------------------------------------------------------------------------------------//
 
 class US
