@@ -1,4 +1,3 @@
-
 #include<Servo.h>
 #define DEBUG 1
 class dropServo
@@ -127,23 +126,45 @@ class moveControl
 	private:
 		motor leftMotor;
 		motor rightMotor;
+		PID turnRegulator;
+		PID goRegulator;
 		char c='';
 		string beta="";
 		int resetIteration=0;
 		int zeroAzimut=0;
 		int targetAzimut=0;
 		int gyroOld=0;
+		int programAzimut=0;
 		int realAzimut=0
 		long timerGyro=0;
+		long millisGyro=0;
 		bool gyroD=0;
 		void azimutControl();
 	public:
 		moveControl();
 		bool setZeroAzimut(int azimut);
-
+		bool setTargetAzimut(int azimut);
 };
 
-bool moveControl::zeroAzimut(int a){
+void azimutControl(int azimut)
+{
+	if(azimut<0)
+	{
+		azimut=360-azimut%360
+	}
+	if(azimut>0)
+	{
+		azimut=azimut%360
+	}
+}
+
+bool setTargetAzimut(int azimut)
+{
+	targetAzimut=azimutControl(azimut);
+}
+
+bool moveControl::zeroAzimut(int a)
+{
 	zeroAzimut=a;
 	if(DEBUG){
 		Serial.println("I set zero Azimut");
@@ -155,6 +176,11 @@ moveControll::moveControl()
 {
 	leftMotor.attach(9,10,11);
 	rightMotor.attach(8,7,6);
+	turnRegulator.calibrate(5,0,0,0);
+	goRegulator.calibrate(5,0,0,0);
+	if(DEBUG){
+		Serial.println("I attach my motor!");
+	}
 }
 
 void moveControl::gyro(){
@@ -174,13 +200,17 @@ void moveControl::gyro(){
 		if (c == '\n')
 		{
 			SerialGyro.print("\n");
-			SerialGyro.print("\n");
 			realAzimut=beta.toInt();
 			beta="";
+			programAzimut=azimutControl(realAzimut+zeroAzimut);
 		}
 		if(abs(gyroOld-realAzimut)<3&&millis()-timerGyro>5000)
 		{
 			gyroD=1;
+			if(DEBUG)
+			{
+				Serial.println("My gyro don't work or i don't turn!");
+			}
 		}
 		else if(abs(gyroOld-realAzimut)>3)
 		{
@@ -191,6 +221,10 @@ void moveControl::gyro(){
 	}
 	if(SerialGyro.available()==0&&millis()-millisGyro>500)
 	{
+		if(DEBUG)
+		{
+			Serial.println("I lose gyro!");
+		}
 		SerialGyro.end();
 		SerialGyro.begin(115200);
 		SerialGyro.print("\n");
@@ -202,5 +236,33 @@ class US
 {
 	private:
 		int port;
+		char filterType='z';//z-zero filter, n- non filter
 	public:
+		int getDistanse();
+		void attach(int portIn, char filterIn);
 };
+
+void US::attach(int portIn, char filterIn)
+{
+	port=portIn;
+	filterType=filterIn;
+}
+
+int US::getDistanse()
+{
+	long duration, distance;
+	pinMode(port,OUTPUT);
+	digitalWrite(port, LOW);
+	delayMicroseconds(2); 
+	digitalWrite(port, HIGH);
+	delayMicroseconds(10); 
+	digitalWrite(port, LOW); 
+	pinMode(port,INPUT);
+	duration = pulseIn(port, HIGH, 30000); 
+	distance = duration / 58;
+	if(filterType='z'&&distance==0)
+	{
+		distance=10000;
+	}
+	return distance;
+}
