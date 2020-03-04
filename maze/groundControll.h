@@ -62,8 +62,9 @@ double PID::UI(int error)
 class moveControll
 {
 	private:
+		int maxPower(int power);
 	public:
-	moveControll();
+		moveControll();
 };
 
 moveControll::moveControll()
@@ -75,3 +76,27 @@ moveControll::moveControll()
 	pinMode(7,OUTPUT);
 	pinMode(6,OUTPUT);
 }
+
+int moveControll:maxPower(int power)
+{
+	if(power<-255)
+	{
+		return -255;
+	}
+	else if(power>255)
+	{
+		return 255;
+	}
+	else
+	{
+		return power;	
+	}
+}
+//---------------------------------------------------------------------------------------------------------------------//
+
+class US
+{
+	private:
+		int port;
+	public:
+};
