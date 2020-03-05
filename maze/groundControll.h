@@ -1,4 +1,9 @@
 #include<Servo.h>
+#include<string.h>
+#include<string.h>
+#include <SoftwareSerial.h>
+
+
 #define DEBUG 1
 class dropServo
 {
@@ -65,7 +70,7 @@ class motor
 {
 	private:
 		int maxPower(int power);
-		int portA,portB,PortC;//c-PWM
+		int portA,portB,portC;//c-PWM
 	public:
 		void attach(int a,int b,int c);
 		void setPower(int power);
@@ -124,43 +129,47 @@ void motor::setPower(int power)
 class moveControl
 {
 	private:
+		SoftwareSerial SerialGyro(10, 11);
 		motor leftMotor;
 		motor rightMotor;
 		PID turnRegulator;
 		PID goRegulator;
-		char c='';
-		string beta="";
+		char c;
+		String beta;
 		int resetIteration=0;
 		int zeroAzimut=0;
 		int targetAzimut=0;
 		int gyroOld=0;
 		int programAzimut=0;
-		int realAzimut=0
+		int realAzimut=0;
 		long timerGyro=0;
 		long millisGyro=0;
 		bool gyroD=0;
-		void azimutControl();
+		int azimutControl(int azimut);
 	public:
 		moveControl();
 		bool setZeroAzimut(int azimut);
 		bool setTargetAzimut(int azimut);
+		void gyro();
 };
 
-void azimutControl(int azimut)
+int moveControl::azimutControl(int azimut)
 {
 	if(azimut<0)
 	{
-		azimut=360-azimut%360
+		azimut=360-azimut%360;
 	}
 	if(azimut>0)
 	{
-		azimut=azimut%360
+		azimut=azimut%360;
 	}
+	return azimut;
 }
 
-bool setTargetAzimut(int azimut)
+bool moveControl::setTargetAzimut(int azimut)
 {
 	targetAzimut=azimutControl(azimut);
+	return 1;
 }
 
 bool moveControl::zeroAzimut(int a)
