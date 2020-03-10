@@ -1,6 +1,6 @@
 #include<Servo.h>
 #include<string.h>
-#include<string.h>
+//#include<cmath.h>
 #include <SoftwareSerial.h>
 
 
@@ -129,7 +129,7 @@ void motor::setPower(int power)
 class moveControl
 {
 	private:
-		SoftwareSerial SerialGyro(10, 11);
+		
 		motor leftMotor;
 		motor rightMotor;
 		PID turnRegulator;
@@ -141,17 +141,48 @@ class moveControl
 		int targetAzimut=0;
 		int gyroOld=0;
 		int programAzimut=0;
-		int realAzimut=0;
+		
 		long timerGyro=0;
 		long millisGyro=0;
 		bool gyroD=0;
 		int azimutControl(int azimut);
+		SoftwareSerial SerialGyro =  SoftwareSerial(12, 4);
+		
+
 	public:
+		int realAzimut=0;
 		moveControl();
-		bool setZeroAzimut(int azimut);
+		void setZeroAzimut(int azimut);
 		bool setTargetAzimut(int azimut);
 		void gyro();
+		void testMotor();
+		void turnTo(int currentAzimut);
 };
+
+void moveControl::turnTo(int currentAzimut)
+{
+	rightMotor.setPower(-((realAzimut+540-currentAzimut)%360-180)*5);
+	leftMotor.setPower(((realAzimut+540-currentAzimut)%360-180)*5);
+}
+
+void moveControl::testMotor()
+{
+	rightMotor.setPower(255);
+	leftMotor.setPower(-255);
+	delay(500);
+	rightMotor.setPower(-255);
+	leftMotor.setPower(255);
+	delay(500);
+	rightMotor.setPower(-255);
+	leftMotor.setPower(-255);
+	delay(500);
+	rightMotor.setPower(255);
+	leftMotor.setPower(255);
+	delay(500);
+	rightMotor.setPower(0);
+	leftMotor.setPower(0);
+	delay(500);
+}
 
 int moveControl::azimutControl(int azimut)
 {
@@ -172,7 +203,7 @@ bool moveControl::setTargetAzimut(int azimut)
 	return 1;
 }
 
-bool moveControl::zeroAzimut(int a)
+void moveControl::setZeroAzimut(int a)
 {
 	zeroAzimut=a;
 	if(DEBUG){
@@ -181,63 +212,21 @@ bool moveControl::zeroAzimut(int a)
 	return 1;
 }
 
-moveControll::moveControl()
+moveControl::moveControl()
 {
+	pinMode(12,INPUT);
 	leftMotor.attach(9,10,11);
-	rightMotor.attach(8,7,6);
+	rightMotor.attach(7,8,6);
 	turnRegulator.calibrate(5,0,0,0);
 	goRegulator.calibrate(5,0,0,0);
-	if(DEBUG){
+	if(DEBUG)
+	{
 		Serial.println("I attach my motor!");
 	}
 }
 
 void moveControl::gyro(){
-	if(SerialGyro.available()) 
-	{
-		millisGyro=millis();
-		c = (char)SerialGyro.read();
-		beta += c;
-		resetIteration++;
-		if(resetIteration==100)
-		{
-			resetIteration=0;
-			SerialGyro.end();
-			SerialGyro.begin(115200);
-			SerialGyro.print("\n");
-		}
-		if (c == '\n')
-		{
-			SerialGyro.print("\n");
-			realAzimut=beta.toInt();
-			beta="";
-			programAzimut=azimutControl(realAzimut+zeroAzimut);
-		}
-		if(abs(gyroOld-realAzimut)<3&&millis()-timerGyro>5000)
-		{
-			gyroD=1;
-			if(DEBUG)
-			{
-				Serial.println("My gyro don't work or i don't turn!");
-			}
-		}
-		else if(abs(gyroOld-realAzimut)>3)
-		{
-			timerGyro=millis();
-			gyroOld=realAzimut;
-			gyroD=0;
-		}
-	}
-	if(SerialGyro.available()==0&&millis()-millisGyro>500)
-	{
-		if(DEBUG)
-		{
-			Serial.println("I lose gyro!");
-		}
-		SerialGyro.end();
-		SerialGyro.begin(115200);
-		SerialGyro.print("\n");
-	}
+	realAzimut=(int)(floor((float)(pulseIn(12, 1)/10)));
 }
 //---------------------------------------------------------------------------------------------------------------------//
 
