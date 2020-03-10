@@ -1,0 +1,133 @@
+#include <Wire.h>
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
+#include "Wire.h"
+#include "Gyro.h"
+#include<US.h>
+#include<IR.h>
+#include<math.h>
+#include <motor.h>
+#include <compass.h>
+MPU6050 mpu;
+
+String inputString = "";         // a String to hold incoming data
+boolean stringComplete = false;  // whether the string is complete
+
+bool dmpReady = false; // set true if DMP init was successful
+uint8_t devStatus; // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize; // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount; // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64]; // FIFO storage buffer
+VectorInt16 aa;  
+VectorInt16 aaReal; 
+VectorFloat gravity; 
+VectorInt16 aaWorld;    // [x, y, z]
+Quaternion q; // [w, x, y, z] quaternion container
+float euler[3]; // [psi, theta, phi] Euler angle container
+int gyro;
+
+void startGyroRead(long ftime);
+int GyroRead();
+Us u;
+Motor m;
+Compass compass;
+int azimut;
+void setup() {
+
+        pinMode(0,INPUT);
+        pinMode(1,OUTPUT);
+  digitalWrite(1,0);
+  pinMode(10,OUTPUT);
+    pinMode(11,OUTPUT);
+      pinMode(12,OUTPUT);
+//Serial.begin(9600);
+//Serial.println("Start:");
+ startGyroRead(20000);
+gyro = GyroRead();
+inputString.reserve(200);
+//InfraredSeeker::Initialize();
+//m.ports(6, 5, 7, 9, 8, 10, 2, 3, 4);
+/*compass.ci();
+compass.read();
+azimut = compass.cps;*/
+}
+float Gyroscope = 0;
+int cam_tr=0;
+String i="";
+void loop() {
+   
+      digitalWrite(10,0);
+  int degree=GyroRead();
+     digitalWrite(1,1);
+     delayMicroseconds(degree*10);
+     digitalWrite(1,0);
+
+}
+int GyroRead() {
+if (!dmpReady) return;
+
+fifoCount = mpu.getFIFOCount();
+
+if (fifoCount == 1024) {
+mpu.resetFIFO();
+GyroRead();
+}
+else {
+while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+mpu.getFIFOBytes(fifoBuffer, packetSize);
+
+fifoCount -= packetSize;
+mpu.dmpGetQuaternion(&q, fifoBuffer);
+mpu.dmpGetEuler(euler, &q);
+float degree=euler[0] * 180/M_PI;
+if(degree<0){
+  degree+=360;
+  }
+//Serial.println(degree);
+return degree;
+//delay(100);
+}
+}
+void startGyroRead(long ftime) {
+Wire.begin();
+Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
+
+//Serial.begin(115200);
+
+Serial.println(F("Initializing I2C devices..."));
+mpu.initialize();
+Serial.println(F("Testing device connections..."));
+Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+if(mpu.testConnection()){
+  digitalWrite(12,1);
+  }
+devStatus = mpu.dmpInitialize();
+mpu.setXGyroOffset(-682); //-682
+mpu.setYGyroOffset(53); //53
+mpu.setZGyroOffset(45); //45
+mpu.setZAccelOffset(1526); //1526 factory default for my test chip
+mpu.setDMPEnabled(true);
+Serial.println(F("DMP ready! Waiting for first interrupt..."));
+dmpReady = true;
+
+packetSize = mpu.dmpGetFIFOPacketSize();
+
+delay(ftime);
+digitalWrite(11,1);
+}
+
+void serialEvent() {
+  while (Serial.available()) {
+    digitalWrite(10,1);
+    // get the new byte:
+    char inChar = (char)Serial.read();
+    // add it to the inputString:
+    inputString += inChar;
+    // if the incoming character is a newline, set a flag so the main loop can
+    // do something about it:
+    if (inChar == '\n') {
+      stringComplete = true;
+    }
+  }
+}
