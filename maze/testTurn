@@ -1,0 +1,16 @@
+
+#include <groundControll.h>
+//SoftwareSerial SerialGyro =  SoftwareSerial(1, 2);
+moveControl ground;
+
+void setup() {
+Serial.begin(115200);
+}
+int i=0;
+void loop() {
+  // put your main code here, to run repeatedly:
+ground.gyro();
+ground.turnTo(10);
+  //ground.testMotor();
+Serial.println(ground.realAzimut);
+}
