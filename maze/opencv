@@ -1,0 +1,314 @@
+/*
+ * Для RCJ Rescue Maze
+ * Запускается на Raspberry Pi или Orange Pi
+ * Распознование букв H S U с вебкамеры и передача строки на Arduino через UART
+ * @RPI S
+ *  где @RPI - это ключ (чтобы не путать с другими системными сообщениями)
+ *  S - (или U или H) найденный камерой на RPI контур буквы
+ * 
+ Компилировать в Linux:
+g++ -ggdb `pkg-config --cflags opencv`  testBin.cpp -o testBin `pkg-config --libs opencv` 
+
+*/
+/*
+ * Для RCJ Rescue Maze
+ * Запускается на Raspberry Pi или Orange Pi
+ * Распознование букв H S U с вебкамеры и передача строки на Arduino через UART
+ * @RPI S
+ *  где @RPI - это ключ (чтобы не путать с другими системными сообщениями)
+ *  S - (или U или H) найденный камерой на RPI контур буквы
+ * 
+ Компилировать в Linux:
+g++ -ggdb `pkg-config --cflags opencv`  test.cpp -o test `pkg-config --libs opencv` 
+
+*/
+
+//поставить 1 - для показа окон, 0 - не показывать
+#define windowshow 1
+//1 - показывать сообщения, 0 - не показывать  
+
+struct RGB {
+    int blue;
+    int green;
+    int red;  };
+
+#define DEBUG 1
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include <fstream>
+#include<vector>
+using namespace std;
+using namespace cv;
+
+bool matrixH[3][5]={{1,1,1,1,1},{0,0,1,0,0},{1,1,1,1,1}};
+bool matrixS[3][5]={{1,1,1,1,1},{1,0,1,0,1},{1,1,1,1,1}};
+bool matrixU[3][5]={{1,1,1,1,1},{0,0,0,0,1},{1,1,1,1,1}};
+int main(int argc, char* argv[])
+{
+        
+
+        ifstream fin("binaryParametrs");
+        int hMin = 0;
+        int hMax = 0;
+        int sMin = 0;
+        int sMax = 0;
+        int vMin = 0;
+        int vMax = 0;
+        fin>>hMin>>hMax>>sMin>>sMax>>vMin>>vMax;
+        fin.close();
+        Mat frame;
+        Mat edges;
+        //Mat black; 
+        
+        Mat binaryFrame;
+        VideoCapture camOne(0);
+        namedWindow("window label", 1);
+        namedWindow("counter", 1);
+        //namedWindow("cut", 1);
+        while(1)
+        {
+                vector< vector<Point> > contours;
+                int conmax=-1,iconmax=0;
+               //frame=imread("bina.jpg", CV_LOAD_IMAGE_COLOR);
+                camOne>>frame;
+                Mat black(frame.size().height,frame.size().width,CV_8UC3,Scalar(0));
+                
+                Scalar lower(hMin, sMin, vMin);
+                Scalar upper(hMax, sMax, vMax);
+                //inRange(frame, Scalar(0,0,0), Scalar(0,0,0), black);
+
+                inRange(frame, lower, upper, edges);
+                //cvtColor(frame, edges, CV_BGR2GRAY);
+                //Canny(edges, edges, 30, 60);
+                imshow("window label", edges);
+                findContours(edges, contours,CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+                cout<<contours.size()<<endl;
+                
+
+               for(int i=0;i<contours.size();i++)
+               {
+                        //cout<< contourArea(contours[i])<<endl;
+                        // if(contourArea(contours[i])>100)
+                        // {
+                        //         contoursMax.push_back(contours[i]);
+                        // }
+                        // else
+                        // {
+                        //        //contours.erase(contours.begin()+i);
+                        //        //cout<< contourArea(contours[i])<<endl;
+                        // }
+                        if(contourArea(contours[i])>conmax){
+                                conmax=contourArea(contours[i]);
+                                iconmax=i;
+                        }
+                }
+                if(iconmax!=-1&&contours.size()>0){
+                        vector< vector<Point> > contoursMax(0,vector<Point>(0));
+                        contoursMax.push_back(contours[iconmax]);
+                        RotatedRect box = cv::minAreaRect(contoursMax[0]);
+                        // Point2f vertices2f[4];
+                        // box.points(vertices2f);
+                        // Point vertices[4]; 
+                        // int xMin=10000,yMin=10000,xMax=0,yMax=0;
+                        // for(int i = 0; i < 4; ++i){
+                        //     vertices[i] = vertices2f[i];
+                        //     xMax=max(vertices[i].x,xMax);
+                        //     yMax=max(vertices[i].y,yMax);
+                        //     xMin=min(vertices[i].x,xMin);
+                        //     yMin=min(vertices[i].y,yMin);
+                        // }
+                        // Scalar color = Scalar(255.0, 255.0,0);
+                        // Point real[5];
+                        // real[1].x= xMin;
+                        // real[1].y= yMin;
+
+                        // real[2].x= xMin;
+                        // real[2].y= yMax;
+
+                        // real[3].x= xMax;
+                        // real[3].y= yMax;
+
+                        // real[4].x= xMax;
+                        // real[4].y= yMin;
+
+                        //cout<<box.points()<<endl;
+                        //rectangle(black, box, Scalar(255,0,0), 2);
+
+                        
+
+                        drawContours(black, contoursMax, -1, Scalar(255,255,255), CV_FILLED);//drawContours(black, contours, -1, Scalar(255,255,255), CV_FILLED); - для закрашивания
+                        waitKey(10);
+                        // line(black, real[1], real[2], Scalar(255,0,255), 1);
+                        // line(black, real[2], real[3], Scalar(255,0,255), 1);
+                        // line(black, real[3], real[4], Scalar(255,0,255), 1);
+                        // line(black, real[4], real[1], Scalar(255,0,255), 1);
+                        Rect cutter = box.boundingRect();
+                        vector< vector<Rect> > cutterZone(3,vector<Rect>(5,cutter));
+                        rectangle(black, cutter, Scalar(255,0,0));
+
+                        vector<vector<float>> SF(3,vector<float>(5,0));
+                        //cout<<cutter.x<<" "<<cutter.y<<" "<<cutter.height<<" "<<cutter.width<<endl;
+                        for(int i=0;i<3;i++)
+                        {
+                                for(int j=0;j<5;j++){
+                                        cutterZone[i][j].x=cutter.x+cutter.width/3*i;
+                                        cutterZone[i][j].y=cutter.y+cutter.height/5*j;
+                                        cutterZone[i][j].height=cutter.height/5;
+                                        cutterZone[i][j].width=cutter.width/3;
+                                }
+                        }
+
+
+                        for(int j=0;j<5;j++){
+                                for(int i=0;i<3;i++){
+                                        int counter=0;
+                                        for(int k=cutterZone[i][j].x;k<cutterZone[i][j].x+cutterZone[i][j].width;k++)
+                                        {
+                                                for(int l=cutterZone[i][j].y;l<cutterZone[i][j].y+cutterZone[i][j].height;l++){
+                                                        //Vec3b color;
+                                                        //color[0] = 255;
+                                                        //color[1] = 0;
+                                                        //color[2] = 255;
+
+                                                        //Vec3b color1;
+                                                        //color[0] = 20;
+                                                        //color[1] = 255;
+                                                        //color[2] = 255;
+                                                        Vec3b bgrPixels = black.at<Vec3b>(Point(k, l));
+                                                        //cout<<(int)bgrPixels[2]<<endl;
+                                                        if((int)bgrPixels[0] == 255 && (int)bgrPixels[1] == 255 && (int)bgrPixels[2] == 255){
+                                                                counter++;
+                                                                 //black.at<Vec3b>(Point(k,l)) = color;
+                                                                
+                                                                
+                                                        }
+                                                        else{
+                                                                // black.at<Vec3b>(Point(k,l)) = color1;
+                                                        }
+                                                        
+                                                         //imshow("counter", black);
+                                                        // waitKey(1);
+
+                                                }
+                                                //waitKey(1);
+                                                
+                                        }
+                                        SF[i][j]=(float)counter/cutterZone[i][j].width/cutterZone[i][j].height*100;
+                                }
+                        }
+
+
+                        for(int i=0;i<5;i++)
+                        {
+                                for(int j=0;j<3;j++){
+                                        rectangle(black, cutterZone[j][i], Scalar(255,0,0));
+                                        //cout<<S[j][i]<<" ";
+                                }
+                                //cout<<endl;
+                        }
+                        cout<<endl;
+                        bool matrix[3][5]={0};
+                        for(int i=0;i<5;i++)
+                                {
+                                for(int j=0;j<3;j++){
+                                
+                                        if(SF[j][i]>10){
+                                              matrix[j][i]=1;  
+                                                
+                                        }
+                                }
+                                
+                        }
+                        for(int i=0;i<5;i++)
+                                {
+                                for(int j=0;j<3;j++){
+                                
+                                        
+                                 //cout<<matrix[j][i]<<" ";  
+                                                
+                                        
+                                }
+                                //cout<<endl;
+                        }
+                        bool U=1,S=1,H=1;
+                        //while(1)
+                        //Mat cutImage;
+                        //cutImage=black(cutter);
+                        //vector< vector<Mat> > cutRect(3,vector<Mat>(5,cutImage));
+                        // cutterZone[1][0].x=cutter.x;
+                        // cutterZone[1][0].y=cutter.y;
+                        // cutterZone[1][0].height=cutter.height/5;
+                        // cutterZone[1][0].height=cutter.width/3;
+                        //rectangle(black, cutterZone[1][0], Scalar(255,0,0));
+                        //Mat cutImage;
+                        //cutImage=black(cutter);
+                        //imshow("cut", cutImage);
+                        //fillConvexPoly(black,vertices, 4,color);
+                        for(int i=0;i<5;i++)
+                        {
+                                for(int j=0;j<3;j++)
+                                {
+                                        if(matrix[j][i]!=matrixH[j][i])
+                                        {
+                                                H=0;
+                                        }
+                                }
+                                //cout<<endl;
+                        }
+                        for(int i=0;i<5;i++)
+                        {
+                                for(int j=0;j<3;j++)
+                                {
+                                        if(matrix[j][i]!=matrixS[j][i])
+                                        {
+                                                S=0;
+                                        }
+                                }
+                                //cout<<endl;
+                        }
+
+                        for(int i=0;i<5;i++)
+                        {
+                                for(int j=0;j<3;j++)
+                                {
+                                        if(matrix[j][i]!=matrixU[j][i])
+                                        {
+                                                U=0;
+                                        }
+                                }
+                                //cout<<endl;
+                        }
+                        imshow("counter", black);
+                        if(U)
+                        {
+                                cout<<"U"<<endl;
+                        }
+                        else if(S)
+                        {
+                                cout<<"S"<<endl;
+                        }
+                        else if(H)
+                        {
+                                cout<<"H"<<endl;
+                        }
+                        else
+                        {
+                                cout<<"else"<<endl;
+                        }
+                        //cout<<endl;
+                }
+
+        }
+        return 0;
+
+}
+//   /      \
+//
+///
+//
+//   \      /
