@@ -11,15 +11,15 @@ class area
 		int buff;
 		int myCordinateX=0,myCordinateY=0;
 		void generate();
+		void check();
 		vector<vector<vector<double>>> zone;
 	public:
 		area(int xIn, int yIn);
 		void draw();
-		void check();
-		bool left();
-		bool forward();
-		bool right();
-		bool back();
+		bool turnLeft();
+		bool goForward();
+		bool turnRight();
+		bool goBack();
 		bool checkWallLeft();
 		bool checkWallBack();
 		bool checkWallRight();
@@ -41,63 +41,85 @@ area::area(int xIn, int yIn)
      	}
  	}
  	generate();
+ 	myCordinateX=rand()%x;
+ 	myCordinateY=rand()%y;
 }
 
-bool area::left()
+bool area::turnLeft()
 {
 	angle.turnLeft();
 	return 1;
 }
 
-bool area::right()
+bool area::turnRight()
 {
 	angle.turnRight();
 	return 1;
 }
 
-bool area::forward()
+bool area::goBack()
 {
-	if(angle.getAngle()==0)
+	if(checkWallBack()==0)
 	{
-		myCordinateY++;
-	}
+		zone[myCordinateX][myCordinateY][0]=1;
+		if(angle.getAngle()==1)
+		{
+			myCordinateY++;
+		}
 
-	else if(angle.getAngle()==1)
-	{
-		myCordinateX++;
-	}
+		else if(angle.getAngle()==2)
+		{
+			myCordinateX--;
+		}
 
-	else if(angle.getAngle()==2)
-	{
-		myCordinateY--;
-	}
+		else if(angle.getAngle()==3)
+		{
+			myCordinateY--;
+		}
 
-	else if(angle.getAngle()==3)
+		else if(angle.getAngle()==4)
+		{
+			myCordinateX++;
+		}
+		zone[myCordinateX][myCordinateY][0]=2;
+	}
+	else
 	{
-		myCordinateX--;
+		cout<<"error";
+		while(1){}
 	}
 }
 
-bool area::back()
+bool area::goForward()
 {
-	if(angle.getAngle()==0)
+	if(checkWallForward()==0)
 	{
-		myCordinateY--;
-	}
+		zone[myCordinateX][myCordinateY][0]=1;
+		if(angle.getAngle()==1)
+		{
+			myCordinateY--;
+		}
 
-	else if(angle.getAngle()==1)
-	{
-		myCordinateX--;
-	}
+		else if(angle.getAngle()==2)
+		{
+			myCordinateX++;
+		}
 
-	else if(angle.getAngle()==2)
-	{
-		myCordinateY++;
-	}
+		else if(angle.getAngle()==3)
+		{
+			myCordinateY++;
+		}
 
-	else if(angle.getAngle()==3)
+		else if(angle.getAngle()==4)
+		{
+			myCordinateX--;
+		}
+		zone[myCordinateX][myCordinateY][0]=2;
+	}
+	else
 	{
-		myCordinateX++;
+		cout<<"error";
+		while(1){}
 	}
 }
 
@@ -152,7 +174,6 @@ void area::generate()
 	{
 		zone[x-1][yx][2]=1;
 	}
-	check();
 }
 
 void area::draw()
@@ -277,9 +298,51 @@ void area::draw()
 		}
 		cout<<endl;
 	}
+	cout<<myCordinateX<<" : "<<myCordinateY<<endl;
 }
 
 void area::check()
 {
 	zone[myCordinateX][myCordinateY][0]=2;
+}
+
+bool area::checkWallForward()
+{
+	return zone[myCordinateX][myCordinateY][angle.getAngle()];
+}
+
+bool area::checkWallLeft()
+{
+	if(angle.getAngle()==1)
+	{
+		return zone[myCordinateX][myCordinateY][4];
+	}
+	else
+	{
+		return zone[myCordinateX][myCordinateY][angle.getAngle()-1];
+	}
+}
+
+bool area::checkWallRight()
+{
+	if(angle.getAngle()==4)
+	{
+		return zone[myCordinateX][myCordinateY][1];
+	}
+	else
+	{
+		return zone[myCordinateX][myCordinateY][angle.getAngle()+1];
+	}
+}
+
+bool area::checkWallBack()
+{
+	if(angle.getAngle()==1||angle.getAngle()==2)
+	{
+		return zone[myCordinateX][myCordinateY][angle.getAngle()+2];
+	}
+	else
+	{
+		return zone[myCordinateX][myCordinateY][angle.getAngle()-2];	
+	}
 }

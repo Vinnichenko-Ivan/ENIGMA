@@ -1,7 +1,7 @@
 class myAngleRotate
 {
 	private:
-		int myAngle=0;
+		int myAngle=1;
 		void checkAngle();
 	public:
 		void turnLeft();
@@ -11,13 +11,13 @@ class myAngleRotate
 
 void myAngleRotate::checkAngle()
 {
-	if(myAngle==-1)
+	if(myAngle==0)
 	{
-		myAngle=3;
+		myAngle=4;
 	}
-	else if(myAngle==4)
+	else if(myAngle==5)
 	{
-		myAngle=0;
+		myAngle=1;
 	}
 }
 
