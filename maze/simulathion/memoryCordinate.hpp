@@ -14,12 +14,116 @@ class memoryCordinate
 		bool goForward();
 		bool turnRight();
 		bool goBack();
+		bool iStayInForwardCordinate();
+		bool iStayInLeftCordinate();
+		bool iStayInBackCordinate();
+		bool iStayInRightCordinate();
 };
 
 memoryCordinate::memoryCordinate()
 {
 	memoryCordinateX.push_back(0);
 	memoryCordinateY.push_back(0);
+}
+
+bool memoryCordinate::iStayInLeftCordinate()
+{
+	int x=myCordinateX,y=myCordinateY;
+	if(angle.getAngle()==1)
+	{
+		x=myCordinateX-1;
+	}
+
+	else if(angle.getAngle()==2)
+	{
+		y=myCordinateY-1;
+	}
+
+	else if(angle.getAngle()==3)
+	{
+		x=myCordinateX+1;
+	}
+
+	else if(angle.getAngle()==4)
+	{
+		y=myCordinateY+1;
+	}
+	return searchElement(x,y);
+}
+
+bool memoryCordinate::iStayInRightCordinate()
+{
+	int x=myCordinateX,y=myCordinateY;
+	if(angle.getAngle()==1)
+	{
+		x=myCordinateX-1;
+	}
+
+	else if(angle.getAngle()==2)
+	{
+		y=myCordinateY-1;
+	}
+
+	else if(angle.getAngle()==3)
+	{
+		x=myCordinateX+1;
+	}
+
+	else if(angle.getAngle()==4)
+	{
+		y=myCordinateY+1;
+	}
+	return searchElement(x,y);
+}
+
+bool memoryCordinate::iStayInBackCordinate()
+{
+	int x=myCordinateX,y=myCordinateY;
+	if(angle.getAngle()==1)
+	{
+		x=myCordinateX-1;
+	}
+
+	else if(angle.getAngle()==2)
+	{
+		y=myCordinateY-1;
+	}
+
+	else if(angle.getAngle()==3)
+	{
+		x=myCordinateX+1;
+	}
+
+	else if(angle.getAngle()==4)
+	{
+		y=myCordinateY+1;
+	}
+	return searchElement(x,y);
+}
+
+bool memoryCordinate::iStayInForwardCordinate()
+{
+	int x=myCordinateX,y=myCordinateY;
+	if(angle.getAngle()==1)
+	{
+		y=myCordinateY-1;
+	}
+
+	else if(angle.getAngle()==2)
+	{
+		x=myCordinateX+1;
+	}
+
+	else if(angle.getAngle()==3)
+	{
+		y=myCordinateY+1;
+	}
+
+	else if(angle.getAngle()==4)
+	{
+		x=myCordinateX-1;
+	}
+	return searchElement(x,y);
 }
 
 void memoryCordinate::addElement()

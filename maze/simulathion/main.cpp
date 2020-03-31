@@ -11,50 +11,54 @@ using namespace std;
 #include "loger.hpp"
 #include "memoryCordinate.hpp"
 #include "area.hpp"
+#include "WallAround.hpp"
 #include "cell.hpp"
+#include "cordinate.hpp"
 
-area fild(10,10);
-cell bufferCell;
+area field(10,10);
 memoryCordinate memory;
 loger actions;
-bool wallLeft,wallRight,wallBack,wallForward;
-string orange="\x1B[1;33;40m";
-string blue="\x1B[0;34;40m";
-string white="\x1B[0;0;40m";	
-string red="\x1B[0;31;40m";	
-string green="\x1B[1;32;40m";
-vector<cell> fildInMemory;
+WallAround wallNear;
+vector<cell> fieldInMemory;
+cell bufferCell;
+constexpr auto orange="\x1B[1;33;40m";
+constexpr auto blue="\x1B[0;34;40m";
+constexpr auto white="\x1B[0;0;40m";	
+constexpr auto red="\x1B[0;31;40m";	
+constexpr auto green="\x1B[1;32;40m";
 
-void checkWall()
+WallAround checkWall()
 {
-	wallLeft=fild.checkWallLeft();
-	wallBack=fild.checkWallBack();
-	wallRight=fild.checkWallRight();
-	wallForward=fild.checkWallForward();
+	WallAround wallAroundIn;
+	wallAroundIn.wallLeft=field.checkWallLeft();
+	wallAroundIn.wallBack=field.checkWallBack();
+	wallAroundIn.wallRight=field.checkWallRight();
+	wallAroundIn.wallForward=field.checkWallForward();
+	return wallAroundIn;
 }
 
-void display()
+void display(WallAround wallAroundIn)
 {
 	cout<<endl<<orange;
 	cout<<"╔═════════════════════════════════════╗"<<endl;
-	cout<<"║wallLeft: "<<wallLeft<<"                          ║"<<endl;
-	cout<<"║wallBack: "<<wallBack<<"                          ║"<<endl;
-	cout<<"║wallRight: "<<wallRight<<"                         ║"<<endl;
-	cout<<"║wallForward: "<<wallForward<<"                       ║"<<endl;
+	cout<<"║wallLeft: "<<wallAroundIn.wallLeft<<"                          ║"<<endl;
+	cout<<"║wallBack: "<<wallAroundIn.wallBack<<"                          ║"<<endl;
+	cout<<"║wallRight: "<<wallAroundIn.wallRight<<"                         ║"<<endl;
+	cout<<"║wallForward: "<<wallAroundIn.wallForward<<"                       ║"<<endl;
 	cout<<"║angel: ";
 	if(memory.angle.getAngle()==1)
 	{
 		cout<<"↑";
 	}
-	if(memory.angle.getAngle()==2)
+	else if(memory.angle.getAngle()==2)
 	{
 		cout<<"→";
 	}
-	if(memory.angle.getAngle()==3)
+	else if(memory.angle.getAngle()==3)
 	{
 		cout<<"↓";
 	}
-	if(memory.angle.getAngle()==4)
+	else if(memory.angle.getAngle()==4)
 	{
 		cout<<"←";
 	}		
@@ -73,142 +77,49 @@ void display()
 
 void turnLeft()
 {
-	fild.turnLeft();
+	field.turnLeft();
 	memory.turnLeft();
 	actions.addElement('L');
 }
 
 void turnRight()
 {
-	fild.turnRight();
+	field.turnRight();
 	memory.turnRight();
 	actions.addElement('R');
 }
 
 void goForward()
 {
-	fild.goForward();
+	field.goForward();
 	memory.goForward();
 	actions.addElement('F');
+	wallNear=checkWall();
+	bufferCell=newCell(wallNear,memory);
+	addCell(fieldInMemory,bufferCell);
 }
 
 void goBack()
 {
-	fild.goBack();
+	field.goBack();
 	memory.goBack();
 	actions.addElement('B');
-}
-
-void newCell()
-{
-	bufferCell.x=memory.myCordinateX;
-	bufferCell.y=memory.myCordinateY;
-	bufferCell.numberCellNear=(int)wallForward+(int)wallLeft+(int)wallRight+(int)wallBack;
-	if(wallForward==0)
-	{
-		bufferCell.whatIsTrue[0]=1;
-		if(memory.angle.getAngle()==1)
-		{
-			bufferCell.yTo[0]=memory.myCordinateY-1;
-		}
-
-		else if(memory.angle.getAngle()==2)
-		{
-			bufferCell.xTo[0]=memory.myCordinateX+1;
-		}
-
-		else if(memory.angle.getAngle()==3)
-		{
-			bufferCell.yTo[0]=memory.myCordinateY+1;
-		}
-
-		else if(memory.angle.getAngle()==4)
-		{
-			bufferCell.xTo[0]=memory.myCordinateX-1;
-		}
-	}
-
-	if(wallBack==0)
-	{
-		bufferCell.whatIsTrue[1]=1;
-		if(memory.angle.getAngle()==1)
-		{
-			bufferCell.yTo[1]=memory.myCordinateY+1;
-		}
-
-		else if(memory.angle.getAngle()==2)
-		{
-			bufferCell.xTo[1]=memory.myCordinateX-1;
-		}
-
-		else if(memory.angle.getAngle()==3)
-		{
-			bufferCell.yTo[1]=memory.myCordinateY-1;
-		}
-
-		else if(memory.angle.getAngle()==4)
-		{
-			bufferCell.xTo[1]=memory.myCordinateX+1;
-		}
-	}
-
-	if(wallLeft==0)
-	{
-		bufferCell.whatIsTrue[2]=1;
-		if(memory.angle.getAngle()==1)
-		{
-			bufferCell.xTo[2]=memory.myCordinateX-1;
-		}
-
-		else if(memory.angle.getAngle()==2)
-		{
-			bufferCell.yTo[2]=memory.myCordinateY-1;
-		}
-
-		else if(memory.angle.getAngle()==3)
-		{
-			bufferCell.xTo[2]=memory.myCordinateX+1;
-		}
-
-		else if(memory.angle.getAngle()==4)
-		{
-			bufferCell.yTo[2]=memory.myCordinateY+1;
-		}
-	}
-
-	if(wallRight==0)
-	{
-		bufferCell.whatIsTrue[3]=1;
-		if(memory.angle.getAngle()==1)
-		{
-			bufferCell.xTo[3]=memory.myCordinateX+1;
-		}
-
-		else if(memory.angle.getAngle()==2)
-		{
-			bufferCell.yTo[3]=memory.myCordinateY+1;
-		}
-
-		else if(memory.angle.getAngle()==3)
-		{
-			bufferCell.xTo[3]=memory.myCordinateX-1;
-		}
-
-		else if(memory.angle.getAngle()==4)
-		{
-			bufferCell.yTo[3]=memory.myCordinateY-1;
-		}
-	}
-
+	wallNear=checkWall();
+	bufferCell=newCell(wallNear,memory);
+	addCell(fieldInMemory,bufferCell);
 }
 
 int main()
 {
 
+	wallNear=checkWall();
+	bufferCell=newCell(wallNear,memory);
+	addCell(fieldInMemory,bufferCell);
+
 	while(1)
 	{
-		checkWall();
-		if(wallForward==0)
+		wallNear=checkWall();
+		if(wallNear.wallForward==0&&memory.iStayInForwardCordinate()==0)
 		{
 			goForward();
 		}
@@ -216,8 +127,8 @@ int main()
 		{
 			turnLeft();
 		}
-		fild.draw();
-		display();
+		field.draw();
+		display(wallNear);
 		usleep(100000);
 	}
 
