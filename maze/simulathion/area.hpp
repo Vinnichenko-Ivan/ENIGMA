@@ -6,10 +6,12 @@ class area
 		string white="\x1B[0;0;40m";	
 		string red="\x1B[0;31;40m";	
 		string green="\x1B[1;32;40m";
+		string magneta="\x1b[35;40m";
+		string cyan="\x1b[36;40m";
 		myAngleRotate angle;
 		int x,y;
 		int buff;
-		int myCordinateX=0,myCordinateY=0;
+		int myCordinateX=0,myCordinateY=0,X,Y;
 		void generate();
 		void check();
 		vector<vector<vector<double>>> zone;
@@ -43,6 +45,9 @@ area::area(int xIn, int yIn)
  	generate();
  	myCordinateX=rand()%x;
  	myCordinateY=rand()%y;
+ 	X=myCordinateX;
+ 	Y=myCordinateY;
+ 	zone[myCordinateX][myCordinateY][0]=3;
 }
 
 bool area::turnLeft()
@@ -179,6 +184,7 @@ void area::generate()
 void area::draw()
 {
 	system("clear");	
+	zone[X][Y][0]=3;
 	check();
 	for(int yi=0;yi<y;yi++)
 	{
@@ -242,9 +248,13 @@ void area::draw()
 			{
 				cout<<orange<<zone[xi][yi][0]<<white;
 			}
-			else
+			else if(zone[xi][yi][0]==2)
 			{
 				cout<<green<<zone[xi][yi][0]<<white;
+			}
+			else
+			{
+				cout<<cyan<<zone[xi][yi][0]<<white;
 			}
 			if(zone[xi][yi][2])
 			{

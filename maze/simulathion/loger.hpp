@@ -7,6 +7,7 @@ class loger
 		void addElement(char a);
 		char getElement();
 		bool deleteElement();
+		void display();
 };
 	
 void loger::addElement(char a)
@@ -15,14 +16,25 @@ void loger::addElement(char a)
 	lenght++;
 }
 
+void loger::display()
+{
+	cout<<endl<<log<<endl;
+}
+
 char loger::getElement()
 {
-	return log[lenght-1];
+	if(lenght>=1)
+	{
+		return log[lenght-1];
+	}
+	else{
+		return 'N';
+	}
 }
 
 bool loger::deleteElement()
 {
-	if(lenght>1)
+	if(lenght>=1)
 	{
 		log.pop_back();
 		lenght--;

@@ -4,6 +4,7 @@ struct cell
 		int yTo[4]={0};
 		bool whatIsTrue[4]={0};
 		int x,y;
+		int counter=0;
 };
 
 bool cellEqualityCordinate(cell a,cell b)
@@ -39,6 +40,11 @@ int findCellOnCordinate(vector<cell> fieldInMemory,int x,int y)
 			return i;
 		}
 	}
+}
+
+string path(int xIn,int yIn,int xOut,int yOut,vector<cell> fieldInMemory)
+{
+	
 }
 
 cell newCell(WallAround wallAroundIn,memoryCordinate memory)

@@ -7,13 +7,13 @@
 #include <vector>
 
 using namespace std;
+#include "cordinate.hpp"
 #include "myAngleRotate.hpp"
 #include "loger.hpp"
 #include "memoryCordinate.hpp"
 #include "area.hpp"
 #include "WallAround.hpp"
 #include "cell.hpp"
-#include "cordinate.hpp"
 
 area field(10,10);
 memoryCordinate memory;
@@ -94,9 +94,9 @@ void goForward()
 	field.goForward();
 	memory.goForward();
 	actions.addElement('F');
-	wallNear=checkWall();
-	bufferCell=newCell(wallNear,memory);
-	addCell(fieldInMemory,bufferCell);
+	//wallNear=checkWall();
+	//bufferCell=newCell(wallNear,memory);
+	//addCell(fieldInMemory,bufferCell);
 }
 
 void goBack()
@@ -104,9 +104,9 @@ void goBack()
 	field.goBack();
 	memory.goBack();
 	actions.addElement('B');
-	wallNear=checkWall();
-	bufferCell=newCell(wallNear,memory);
-	addCell(fieldInMemory,bufferCell);
+	//wallNear=checkWall();
+	//bufferCell=newCell(wallNear,memory);
+	//addCell(fieldInMemory,bufferCell);
 }
 
 int main()
@@ -115,14 +115,67 @@ int main()
 	wallNear=checkWall();
 	bufferCell=newCell(wallNear,memory);
 	addCell(fieldInMemory,bufferCell);
-
+	cout<<(int)(memory.iStayInLeftCordinate()||wallNear.wallLeft)<<(int)(memory.iStayInForwardCordinate()||wallNear.wallForward)<<(int)(memory.iStayInRightCordinate()||wallNear.wallRight)<<(int)(memory.iStayInBackCordinate()||wallNear.wallBack)<<endl;
+	
+	//while(1){}
 	while(1)
 	{
 		wallNear=checkWall();
+		actions.display();
 		if(wallNear.wallForward==0&&memory.iStayInForwardCordinate()==0)
 		{
+			if(memory.iStayInLeftCordinate()==0&&wallNear.wallLeft==0)
+			{
+				memory.targetLeft();
+			}
+
+			if(memory.iStayInRightCordinate()==0&&wallNear.wallRight==0)
+			{
+				memory.targetRight();
+			}
+
+			if(memory.iStayInBackCordinate()==0&&wallNear.wallBack==0)
+			{
+				memory.targetBack();
+			}
+
 			goForward();
 		}
+
+		else if(((int)(memory.iStayInLeftCordinate()||wallNear.wallLeft)+(int)(memory.iStayInForwardCordinate()||wallNear.wallForward)+(int)(memory.iStayInRightCordinate()||wallNear.wallRight)+(int)(memory.iStayInBackCordinate()||wallNear.wallBack))==4)
+		{
+			//cordinate target=memory.getNearTarget();
+			//cout<<target.x<<" : "<<target.y<<endl;
+			char a=actions.getElement();
+			actions.deleteElement();
+			if(a=='F')
+			{
+				goBack();
+				actions.deleteElement();
+			}
+			else if(a=='R')
+			{
+				turnLeft();
+				actions.deleteElement();
+			}
+			else if(a=='L')
+			{
+				turnRight();
+				actions.deleteElement();
+			}
+			else if(a=='B')
+			{
+				goForward();
+				actions.deleteElement();
+			}
+			if(memory.myCordinateX==0&&memory.myCordinateY==0)
+			{
+				field.draw();
+				return 0;
+			}
+
+		}
+
 		else
 		{
 			turnLeft();
